@@ -1,0 +1,431 @@
+script.
+	function openIframe(url, id, title, width, height) {
+		// if iframe already exists, remove it
+		const existingIframe = document.getElementById(id);
+		if (existingIframe) {
+			document.body.removeChild(existingIframe);
+		}
+
+		// 创建遮罩层
+		const overlay = document.createElement('div');
+		overlay.style.position = 'fixed';
+		overlay.style.top = '0';
+		overlay.style.left = '0';
+		overlay.style.width = '100%';
+		overlay.style.height = '100%';
+		overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+		overlay.style.zIndex = '999';
+		document.body.appendChild(overlay);
+
+		// 创建 iframe
+		const iframe = document.createElement('iframe');
+		iframe.id = id;
+		iframe.src = url;
+		iframe.style.width = width;
+		iframe.style.height = height;
+		iframe.style.border = 'none';
+		iframe.style.position = 'fixed';
+		iframe.style.top = 'calc(50% + 25px)'; // 向下偏移header高度的一半
+		iframe.style.left = '50%';
+		iframe.style.transform = 'translate(-50%, -50%)';
+		iframe.style.zIndex = '1000';
+		iframe.style.backgroundColor = 'white';
+		iframe.style.borderRadius = '0 0 8px 8px'; // 只保留底部圆角
+		iframe.style.paddingTop = '20px';
+		document.body.appendChild(iframe);
+
+		// 创建标题栏
+		const header = document.createElement('div');
+		header.style.width = width;
+		header.style.height = '50px';
+		header.style.position = 'fixed';
+		header.style.top = 'calc(50% - 30%)';
+		header.style.left = '50%';
+		header.style.transform = 'translate(-50%, 0)';
+		header.style.backgroundColor = '#f8f9fa';
+		header.style.borderRadius = '8px 8px 0 0';
+		header.style.borderBottom = '1px solid #dee2e6';
+		header.style.zIndex = '1000';
+		header.style.display = 'flex';
+		header.style.alignItems = 'center';
+		header.style.padding = '0 20px';
+		header.style.boxSizing = 'border-box';
+		document.body.appendChild(header);
+
+		// 添加标题文本
+		const titleHeader = document.createElement('div');
+		titleHeader.innerHTML = title;
+		titleHeader.style.fontSize = '18px';
+		titleHeader.style.fontWeight = '500';
+		titleHeader.style.color = '#333';
+		header.appendChild(titleHeader);
+
+		// 修改关闭按钮
+		const closeButton = document.createElement('button');
+		closeButton.innerHTML = '×';
+		closeButton.style.marginLeft = 'auto';
+		closeButton.style.background = 'none';
+		closeButton.style.border = 'none';
+		closeButton.style.fontSize = '24px';
+		closeButton.style.color = '#666';
+		closeButton.style.cursor = 'pointer';
+		closeButton.style.padding = '0';
+		closeButton.style.width = '30px';
+		closeButton.style.height = '30px';
+		closeButton.style.display = 'flex';
+		closeButton.style.alignItems = 'center';
+		closeButton.style.justifyContent = 'center';
+		closeButton.onclick = function() {
+			document.body.removeChild(iframe);
+			document.body.removeChild(overlay);
+			document.body.removeChild(header);
+		};
+		header.appendChild(closeButton);
+	}
+
+//- FIXED: 2026-11-22 顶部导航的「站点功能菜单」（原白板 / 论文模板 / TikZ 模板三项写死在这里）
+//- 改成配置驱动：数据来自 MongoDB（sharelatex.nav_menus / _id=portal），
+//- 运营后台 carsi-mgr「导航菜单」页维护，不发版就能加临时入口。
+//- 渲染 mixin 见 layout/portal-menu.pug（item / group / separator 三种 kind）。
+include portal-menu
+
+nav.navbar.navbar-default.navbar-main
+	.container-fluid
+		.navbar-header
+			if (typeof(suppressNavbarRight) == "undefined")
+				button.navbar-toggle.collapsed(
+					type="button",
+					data-toggle="collapse",
+					data-target="[data-ol-navbar-main-collapse]"
+					aria-label="Toggle " + translate('navigation')
+				)
+					i.fa.fa-bars(aria-hidden="true")
+			- var enableUpgradeButton = projectDashboardReact && usersBestSubscription && usersBestSubscription.type === 'free'
+			if (enableUpgradeButton)
+				a.btn.btn-primary.pull-right.me-2.visible-xs(
+					href="/user/subscription/plans"
+					event-tracking="upgrade-button-click"
+					event-tracking-mb="true"
+					event-tracking-label="upgrade"
+					event-tracking-trigger="click"
+					event-segmentation='{"source": "dashboard-top", "project-dashboard-react": "enabled", "is-dashboard-sidebar-hidden": "true", "is-screen-width-less-than-768px": "true"}'
+				) #{translate("upgrade")}
+			if settings.nav.custom_logo
+				a(href='/', aria-label=settings.appName, style='background-image:url("'+settings.nav.custom_logo+'")').navbar-brand
+			else if (nav.title)
+				a(href='/', aria-label=settings.appName).navbar-title 
+					if nav.title === 'FlyLaTeX'
+						| 𝔽𝕝𝕪𝕃𝕒𝕋𝕖𝕏
+					else
+						| #{nav.title}
+			else
+				a(href='/', aria-label=settings.appName).navbar-brand
+
+		- var canDisplayAdminMenu = hasAdminAccess()
+		- var canDisplayAdminRedirect = canRedirectToAdminDomain()
+		- var canDisplaySplitTestMenu = hasFeature('saas') && (canDisplayAdminMenu || (getSessionUser() && getSessionUser().staffAccess && (getSessionUser().staffAccess.splitTestMetrics || getSessionUser().staffAccess.splitTestManagement)))
+		- var canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu
+		- var featuresPageVariant = splitTestVariants && splitTestVariants['features-page']
+
+		if (typeof(suppressNavbarRight) == "undefined")
+			.navbar-collapse.collapse(data-ol-navbar-main-collapse)
+				ul.nav.navbar-nav.navbar-right
+					if (canDisplayAdminMenu || canDisplayAdminRedirect || canDisplaySplitTestMenu)
+						li.dropdown.subdued
+							a.dropdown-toggle(
+								href="#",
+								role="button",
+								aria-haspopup="true",
+								aria-expanded="false",
+								data-toggle="dropdown"
+							)
+								| Admin
+								span.caret
+							ul.dropdown-menu
+								if canDisplayAdminMenu
+									li
+										a(href="/admin") Manage Site
+									li
+										a(href="/admin/user") Manage Users
+									li
+										a(href="/admin/project") Project URL Lookup
+								if canDisplayAdminRedirect
+									li
+										a(href=settings.adminUrl) Switch to Admin
+								if canDisplaySplitTestMenu
+									li
+										a(href="/admin/split-test") Manage Feature Flags
+								if canDisplaySurveyMenu
+									li
+										a(href="/admin/survey") Manage Surveys
+
+					// loop over header_extras
+					each item in nav.header_extras
+						-
+							if ((item.only_when_logged_in && getSessionUser())
+											|| (item.only_when_logged_out && (!getSessionUser()))
+											|| (!item.only_when_logged_out && !item.only_when_logged_in && !item.only_content_pages)
+											|| (item.only_content_pages && (typeof(suppressNavContentLinks) == "undefined" || !suppressNavContentLinks))
+							){
+								var showNavItem = true
+							} else {
+								var showNavItem = false
+							}
+
+						if showNavItem
+							if item.dropdown
+								li.dropdown(class=item.class)
+									a.dropdown-toggle(
+										href="#",
+										role="button",
+										aria-haspopup="true",
+										aria-expanded="false",
+										data-toggle="dropdown"
+									)
+										| !{translate(item.text)}
+										span.caret
+									ul.dropdown-menu
+										each child in item.dropdown
+											if child.divider
+												li.divider
+											else if child.isContactUs
+												li
+													a(data-ol-open-contact-form-modal="contact-us" href)
+														span(event-tracking="menu-clicked-contact" event-tracking-mb="true" event-tracking-trigger="click")
+															| #{translate("contact_us")}
+											else
+												li
+													if child.url
+														if !child.splitTest || child.splitTest && child.splitTest === 'features-page' && child.splitTestVariant === featuresPageVariant
+															a(
+																href=child.url,
+																class=child.class,
+																event-tracking=child.event
+																event-tracking-mb="true"
+																event-tracking-trigger="click"
+																event-segmentation=child.eventSegmentation
+															) !{translate(child.text)}
+													else
+														| !{translate(child.text)}
+							else
+								li(class=item.class)
+									if item.url
+										a(
+											href=item.url,
+											class=item.class,
+											event-tracking=item.event
+											event-tracking-mb="true"
+											event-tracking-trigger="click"
+										) !{translate(item.text)}
+									else
+										| !{translate(item.text)}
+
+					// logged out
+					if !getSessionUser()
+						//- FIXED: 2026-11-22 配置化菜单里 visibility=any / logged-out 的项
+						//- （portalMenu.forGuest 已按当前登录状态过滤好，没配置就是空数组）
+						+portalMenuList(portalMenu && portalMenu.forGuest)
+						// register link 
+						if hasFeature('registration-page')
+							li
+								//- a(
+								//- 	href="javascript:void(0)"
+								//- 	onclick="openIframe('https://example.com/account-center', 'register-iframe', '用户注册', '900px', '60%')"
+								//- 	event-tracking="menu-clicked-register"
+								//- 	event-tracking-action="clicked"
+								//- 	event-tracking-trigger="click"
+								//- 	event-tracking-mb="true"
+								//- 	event-segmentation={ page: currentUrl }
+								//- ) #{translate('register')}
+								a(
+									href="https://example.com/account-center"
+									target="_blank"
+									event-tracking="menu-clicked-register"
+									event-tracking-action="clicked"
+									event-tracking-trigger="click"
+									event-tracking-mb="true"
+									event-segmentation={ page: currentUrl }
+								) #{translate('register')}
+
+						// login link
+						li
+							a(
+								href="/login"
+								event-tracking="menu-clicked-login"
+								event-tracking-action="clicked"
+								event-tracking-trigger="click"
+								event-tracking-mb="true"
+								event-segmentation={ page: currentUrl }
+							) #{translate('log_in')}
+
+					if getSessionUser()
+						//- FIXED: 2026-11-22 白板 / 论文模板 / TikZ 模板 不再写死：
+						//- 由 MongoDB（nav_menus/portal）驱动，运营后台 carsi-mgr 维护。
+						//- items 为空 = 运营显式清空；从没配过 = PortalMenu 内置的三项兜底
+						//- （与改造前逐字等价：三个链接、新开页、只对登录用户显示）。
+						+portalMenuList(portalMenu && portalMenu.forUser)
+						li
+							a(href="/project") #{translate('Projects')}
+							//- a(href="/project") #{'项目'}							
+						li.dropdown
+							a.dropdown-toggle(
+								href="#",
+								role="button",
+								aria-haspopup="true",
+								aria-expanded="false",
+								data-toggle="dropdown"
+							)
+								| #{translate('Account')}
+								//- | #{'账户'}								
+								span.caret
+							ul.dropdown-menu
+								li
+									div.subdued #{getSessionUser().email}
+								li.divider.hidden-xs.hidden-sm
+								li
+									//- a(href="/user/settings") #{translate('Account Settings')}
+									a(href="/user/settings") #{translate('Account Settings')}		
+								li
+									a#getSidLink(href="javascript:void(0)") #{translate('get_sid')}	
+								li
+									a#openWhiteboard(href="javascript:void(0)") #{translate('open_whiteboard')}
+														
+								if nav.showSubscriptionLink	
+									li
+										a(href="/user/subscription") #{translate('subscription')}
+								li.divider.hidden-xs.hidden-sm
+								li
+									form(method="POST" action="/logout")
+										input(name='_csrf', type='hidden', value=csrfToken)
+										//- button.btn-link.text-left.dropdown-menu-button #{translate('log_out')}
+										button.btn-link.text-left.dropdown-menu-button #{translate('log_out')}										
+						//- FIXED: 2026-11-05 全局主题快捷切换（放在导航栏最右侧）：
+						//- 以前只能进项目 → 设置 里改，藏得太深。这里直接用服务端渲染好的主题清单
+						//- （ol-overallThemes），点一下就换样式表 + 存设置，逻辑与编辑器
+						//- 「设置 → 全局主题」一致（见下方内联脚本）。
+						if overallThemes && overallThemes.length
+							- var currentOverallTheme = (userSettings && userSettings.overallTheme) || ''
+							- var currentOverallThemeMeta = overallThemes.filter(function (theme) { return theme.val === currentOverallTheme })[0]
+							- var currentOverallThemeLabel = currentOverallThemeMeta && currentOverallThemeMeta.nameKey ? translate(currentOverallThemeMeta.nameKey) : (currentOverallThemeMeta ? currentOverallThemeMeta.name : translate('overall_theme'))
+							li.dropdown.overall-theme-picker(data-current-theme=currentOverallTheme)
+								a.dropdown-toggle(
+									href="#",
+									role="button",
+									aria-haspopup="true",
+									aria-expanded="false",
+									data-toggle="dropdown",
+									aria-label=translate('overall_theme')
+								)
+									i.fa.fa-adjust(aria-hidden="true")
+									span.overall-theme-picker-label= currentOverallThemeLabel
+									span.caret
+								ul.dropdown-menu.dropdown-menu-right
+									li.dropdown-header #{translate('overall_theme')}
+									each theme in overallThemes
+										- var themeLabel = theme.nameKey ? translate(theme.nameKey) : theme.name
+										li.overall-theme-picker-option(class=(theme.val === currentOverallTheme ? 'active' : undefined))
+											a(
+												href="#",
+												data-theme-val=theme.val,
+												data-theme-path=theme.path,
+												data-theme-editor-theme=theme.editorTheme
+											)
+												span.overall-theme-picker-option-label= themeLabel
+												i.fa.fa-check.overall-theme-picker-check(aria-hidden="true")
+
+// FIXED: 2026-11-05 导航栏「全局主题」快捷切换的交互逻辑：
+// 与编辑器「设置 → 全局主题」一致 —— 换 head 里的 link#main-stylesheet，
+// 并把 overallTheme（以及服务端给出的配对编辑器主题）存到 /user/settings。
+script(type="text/javascript", nonce=scriptNonce).
+	;(function () {
+		function getMetaContent(name) {
+			var element = document.head.querySelector('meta[name="' + name + '"]')
+			return element ? element.content : null
+		}
+
+		function applyStyleSheet(path) {
+			if (!path) {
+				return
+			}
+			var oldStyleSheet = document.getElementById('main-stylesheet')
+			var newStyleSheet = document.createElement('link')
+			newStyleSheet.setAttribute('rel', 'stylesheet')
+			newStyleSheet.setAttribute('id', 'main-stylesheet')
+			newStyleSheet.setAttribute('href', path)
+			// 新样式表加载完成后再移除旧的，避免切换过程中出现无样式闪烁
+			newStyleSheet.addEventListener(
+				'load',
+				function () {
+					if (oldStyleSheet && oldStyleSheet.parentNode) {
+						oldStyleSheet.parentNode.removeChild(oldStyleSheet)
+					}
+				},
+				{ once: true }
+			)
+			document.head.appendChild(newStyleSheet)
+		}
+
+		function saveTheme(overallTheme, editorTheme) {
+			var body = { overallTheme: overallTheme }
+			if (editorTheme) {
+				body.editorTheme = editorTheme
+			}
+			return fetch('/user/settings', {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: {
+					'Content-Type': 'application/json',
+					Accept: 'application/json',
+					'X-Csrf-Token': getMetaContent('ol-csrfToken') || window.csrfToken || '',
+				},
+				body: JSON.stringify(body),
+			}).catch(function (error) {
+				if (window.console && window.console.error) {
+					window.console.error('Failed to save overall theme', error)
+				}
+			})
+		}
+
+		function initOverallThemePicker() {
+			var picker = document.querySelector('.overall-theme-picker')
+			if (!picker) {
+				return
+			}
+
+			picker.addEventListener('click', function (event) {
+				var link = event.target.closest && event.target.closest('a[data-theme-val]')
+				if (!link) {
+					return
+				}
+				event.preventDefault()
+
+				var overallTheme = link.getAttribute('data-theme-val')
+				if (overallTheme === picker.getAttribute('data-current-theme')) {
+					picker.classList.remove('open')
+					return
+				}
+				picker.setAttribute('data-current-theme', overallTheme)
+				applyStyleSheet(link.getAttribute('data-theme-path'))
+
+				// 更新按钮文案与勾选状态（不刷新页面）
+				var optionLabel = link.querySelector('.overall-theme-picker-option-label')
+				var toggleLabel = picker.querySelector('.overall-theme-picker-label')
+				if (optionLabel && toggleLabel) {
+					toggleLabel.textContent = optionLabel.textContent
+				}
+				var options = picker.querySelectorAll('.overall-theme-picker-option')
+				for (var i = 0; i < options.length; i++) {
+					options[i].classList.toggle('active', options[i] === link.parentNode)
+				}
+				picker.classList.remove('open')
+
+				saveTheme(overallTheme, link.getAttribute('data-theme-editor-theme'))
+			})
+		}
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', initOverallThemePicker)
+		} else {
+			initOverallThemePicker()
+		}
+	})()

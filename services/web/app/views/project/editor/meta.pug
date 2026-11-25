@@ -1,0 +1,64 @@
+meta(name="ol-project_id" content=project_id)
+meta(name="ol-projectName" content=projectName)
+meta(name="ol-userSettings" data-type="json" content=userSettings)
+meta(name="ol-user" data-type="json" content=user)
+meta(name="ol-learnedWords" data-type="json" content=learnedWords)
+meta(name="ol-anonymous" data-type="boolean" content=anonymous)
+meta(name="ol-brandVariation" data-type="json" content=brandVariation)
+meta(name="ol-anonymousAccessToken" content=anonymousAccessToken)
+meta(name="ol-isTokenMember" data-type="boolean" content=isTokenMember)
+meta(name="ol-isRestrictedTokenMember" data-type="boolean" content=isRestrictedTokenMember)
+meta(name="ol-maxDocLength" data-type="json" content=maxDocLength)
+meta(name="ol-wikiEnabled" data-type="boolean" content=settings.proxyLearn)
+meta(name="ol-gitBridgePublicBaseUrl" content=gitBridgePublicBaseUrl)
+meta(name="ol-gitBridgeEnabled" data-type="boolean" content=gitBridgeEnabled)
+meta(name="ol-compilesUserContentDomain" content=settings.compilesUserContentDomain)
+meta(name="ol-fallbackCompileDomain" content=settings.pdfDownloadDomain)
+//- Set base path for Ace scripts loaded on demand/workers and don't use cdn
+meta(name="ol-aceBasePath" content="/js/" + lib('ace'))
+//- enable doc hash checking for all projects
+//- used in public/js/libs/sharejs.js
+meta(name="ol-useShareJsHash" data-type="boolean" content=true)
+meta(name="ol-wsRetryHandshake" data-type="json" content=settings.wsRetryHandshake)
+meta(name="ol-pdfjsVariant" content=pdfjsVariant)
+meta(name="ol-debugPdfDetach" data-type="boolean" content=debugPdfDetach)
+meta(name="ol-showLegacySourceEditor", data-type="boolean" content=showLegacySourceEditor)
+meta(name="ol-showSourceToolbar", data-type="boolean" content=showSourceToolbar)
+meta(name="ol-showSymbolPalette" data-type="boolean" content=showSymbolPalette)
+meta(name="ol-symbolPaletteAvailable" data-type="boolean" content=symbolPaletteAvailable)
+meta(name="ol-detachRole" data-type="string" content=detachRole)
+meta(name="ol-allowedImageNames" data-type="json" content=allowedImageNames)
+meta(name="ol-languages" data-type="json" content=languages)
+meta(name="ol-editorThemes" data-type="json" content=editorThemes)
+meta(name="ol-legacyEditorThemes" data-type="json" content=legacyEditorThemes)
+meta(name="ol-showUpgradePrompt" data-type="boolean" content=showUpgradePrompt)
+meta(name="ol-useOpenTelemetry" data-type="boolean" content=useOpenTelemetry)
+meta(name="ol-showSupport", data-type="boolean" content=showSupport)
+//- FIXED: 2026-11-01 「帮助 - 联系我们」的跳转地址（环境变量 CONTACT_US_URL，可为 mailto:）
+meta(name="ol-contactUsUrl" content=(settings && settings.contactUsUrl) || '')
+meta(name="ol-showTemplatesServerPro", data-type="boolean" content=showTemplatesServerPro)
+meta(name="ol-showCM6SwitchAwaySurvey", data-type="boolean" content=showCM6SwitchAwaySurvey)
+meta(name="ol-showPersonalAccessToken", data-type="boolean" content=showPersonalAccessToken)
+meta(name="ol-optionalPersonalAccessToken", data-type="boolean" content=optionalPersonalAccessToken)
+meta(name="ol-isReviewPanelReact", data-type="boolean" content=isReviewPanelReact)
+meta(name="ol-hasTrackChangesFeature", data-type="boolean" content=hasTrackChangesFeature)
+meta(name="ol-mathJax3Path" content=mathJax3Path)
+meta(name="ol-completedTutorials", data-type="json" content=user.completedTutorials)
+meta(name="ol-projectTags" data-type="json" content=projectTags)
+meta(name="ol-idePageReact", data-type="boolean" content=idePageReact)
+meta(name="ol-loadingText", data-type="string" content=translate("loading"))
+meta(name="ol-translationLoadErrorMessage", data-type="string" content=translate("could_not_load_translations"))
+
+- var fileActionI18n = ['edited', 'renamed', 'created', 'deleted'].reduce((acc, i) => {acc[i] = translate('file_action_' + i); return acc}, {})
+meta(name="ol-fileActionI18n" data-type="json" content=fileActionI18n)
+
+// FIXED: 2026-10-29 不依赖 settings.overleaf（本 fork 未配置），否则 meta 不渲染，
+// 设置面板只显示"编辑器主题"，看不到"全局主题"
+if (settings.overleaf != null || settings.enableOverallThemes)
+	meta(name="ol-overallThemes" data-type="json" content=overallThemes)
+
+// FIXED: 2026-10-30 AI 面板展示位置（side | bottom），React 侧的 AI 面板读它决定挂到哪
+meta(name="ol-aiPanelLayout" content=(userSettings && userSettings.aiPanelLayout) || 'side')
+
+// FIXED: 2026-11-01 设置的显示方式（left | modal），点「文件 - 设置」时决定开哪个
+meta(name="ol-settingsPanelMode" content=(userSettings && userSettings.settingsPanelMode) || 'modal')

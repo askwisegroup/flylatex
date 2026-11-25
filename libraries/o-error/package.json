@@ -1,0 +1,47 @@
+{
+  "name": "@overleaf/o-error",
+  "version": "3.4.0",
+  "description": "Light-weight helpers for handling JavaScript Errors in node.js and the browser. Helps with long stack traces, Error subclasses, wrapping internal errors (causes), and attaching extra data to errors for logging.",
+  "keywords": [
+    "browser",
+    "node",
+    "error",
+    "long stack trace",
+    "stack trace",
+    "stack",
+    "cause",
+    "verror"
+  ],
+  "main": "index.cjs",
+  "types": "types/index.cjs",
+  "files": [
+    "index.cjs",
+    "index.d.ts"
+  ],
+  "scripts": {
+    "build": "npm run --silent typecheck && npm run --silent test && npm run --silent declaration:build && npm run --silent update-readme",
+    "declaration:build": "rm -f index.d.ts && tsc --allowJs --declaration --emitDeclarationOnly --moduleResolution node --target ES6 index.js",
+    "declaration:check": "git diff --exit-code -- index.d.ts",
+    "lint": "eslint --ext .js --ext .cjs --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix --ext .js --ext .cjs .",
+    "prepublishOnly": "npm run --silent declaration:build && npm run --silent declaration:check",
+    "test": "npm run lint && npm run format && npm run typecheck && npm run test:unit",
+    "typecheck": "tsc --noEmit",
+    "update-readme": "doc/update-readme.js",
+    "format": "prettier --list-different $PWD/'**/*.{js,cjs}'",
+    "format:fix": "prettier --write $PWD/'**/*.{js,cjs}'",
+    "test:ci": "npm run test:unit",
+    "test:unit": "mocha --exit test/**/*.{js,cjs}",
+    "update-types": "rm -rf types && tsc --emitDeclarationOnly"
+  },
+  "author": "Overleaf (https://www.overleaf.com)",
+  "license": "MIT",
+  "repository": "github:overleaf/o-error",
+  "devDependencies": {
+    "@types/chai": "^4.3.0",
+    "@types/node": "^18.17.4",
+    "chai": "^4.3.6",
+    "mocha": "^10.2.0",
+    "typescript": "^5.0.4"
+  }
+}

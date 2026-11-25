@@ -1,0 +1,113 @@
+{
+  "theme": {
+    "&": {
+      "backgroundColor": "#faf9f5",
+      "color": "#2c2c2a"
+    },
+    ".cm-gutters": {
+      "backgroundColor": "transparent",
+      "borderRightColor": "transparent",
+      "background": "#f5f2ea",
+      "color": "#a8a294"
+    },
+    ".cm-cursor, .cm-dropCursor": {
+      "color": "#c15f3c"
+    },
+    "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection, .cm-searchMatch.cm-searchMatch.cm-searchMatch-selected": {
+      "background": "rgba(193, 95, 60, 0.16)"
+    },
+    "&.cm-focused .cm-matchingBracket, &.cm-focused .cm-nonmatchingBracket": {
+      "margin": 0,
+      "outline": "1px solid #c9a894"
+    },
+    ".cm-activeLine": {
+      "background": "rgba(122, 108, 86, 0.06)"
+    },
+    ".cm-activeLineGutter": {
+      "backgroundColor": "#ece8dd"
+    },
+    ".cm-selectionMatch.cm-selectionMatch, .cm-searchMatch.cm-searchMatch": {
+      "background": "rgba(193, 95, 60, 0.10)",
+      "outline": "1px solid rgba(193, 95, 60, 0.35)",
+      "margin": 0
+    },
+    ".cm-foldPlaceholder": {
+      "backgroundColor": "#d9c7b8"
+    }
+  },
+  "highlightStyle": {
+    ".tok-keyword": {
+      "color": "#a94e2f"
+    },
+    ".tok-macroName": {
+      "color": "#a94e2f"
+    },
+    ".tok-typeName": {
+      "color": "#6d7b4a"
+    },
+    ".tok-labelName": {
+      "color": "#8c5a7a"
+    },
+    ".tok-literal": {
+      "color": "#8c5a7a"
+    },
+    ".tok-string": {
+      "color": "#5f7a43"
+    },
+    ".tok-string2": {
+      "color": "#a9722e"
+    },
+    ".tok-number": {
+      "color": "#96603a"
+    },
+    ".tok-atom": {
+      "color": "#96603a"
+    },
+    ".tok-bool": {
+      "color": "#96603a"
+    },
+    ".tok-comment": {
+      "color": "#78715f"
+    },
+    ".tok-meta": {
+      "color": "#78715f"
+    },
+    ".tok-operator": {
+      "color": "#7d7568"
+    },
+    ".tok-punctuation": {
+      "color": "#7d7568"
+    },
+    ".tok-attributeValue": {
+      "color": "#96603a"
+    },
+    ".tok-function": {
+      "color": "#b06a2c"
+    },
+    ".tok-heading": {
+      "color": "#7a3f22"
+    },
+    ".tok-list": {
+      "color": "#a4517a"
+    },
+    ".tok-link": {
+      "color": "#a94e2f",
+      "textDecoration": "underline"
+    },
+    ".tok-url": {
+      "color": "#a94e2f"
+    },
+    ".tok-inserted": {
+      "color": "#5f7a43"
+    },
+    ".tok-deleted": {
+      "color": "#b3261e",
+      "textDecoration": "line-through"
+    },
+    ".tok-invalid": {
+      "backgroundColor": "rgba(179, 38, 30, 0.10)",
+      "color": "#b3261e"
+    }
+  },
+  "dark": false
+}

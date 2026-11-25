@@ -1,0 +1,21 @@
+{
+  "name": "@overleaf/settings",
+  "description": "A centralised settings system for Overleaf",
+  "version": "3.0.0",
+  "repository": "overleaf/settings-module",
+  "scripts": {
+    "lint": "eslint --ext .js --ext .cjs --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix --ext .js --ext .cjs .",
+    "format": "prettier --list-different $PWD/'**/*.{js,cjs}'",
+    "format:fix": "prettier --write $PWD/'**/*.{js,cjs}'",
+    "test": "npm run lint && npm run format && npm run typecheck && npm run test:unit",
+    "test:ci": "npm run test:unit",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "mocha --exit test/**/*.{js,cjs}",
+    "update-types": "rm -rf types && tsc --emitDeclarationOnly"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0",
+    "typescript": "^5.0.4"
+  }
+}

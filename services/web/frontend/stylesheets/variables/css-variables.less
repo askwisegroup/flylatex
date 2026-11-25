@@ -1,0 +1,108 @@
+:root {
+  // FlyLaTeX 主题：表层与文字（TS 内联样式通过 var(--fl-*) 取用）
+  --fl-surface: @fl-surface;
+  --fl-surface-raised: @fl-surface-raised;
+  --fl-border: @fl-border;
+  --fl-text: @fl-text;
+  --fl-text-muted: @fl-text-muted;
+  --fl-text-subtle: @fl-text-subtle;
+  --fl-link: @fl-link;
+  --fl-link-bright: @fl-link-bright;
+  --fl-kbd-bg: @fl-kbd-bg;
+  // 模态框/面板里的次要按钮（搜索面板的翻页、替换按钮等）
+  --fl-btn-secondary-bg: @fl-btn-secondary-bg;
+  --fl-btn-secondary-color: @fl-btn-secondary-color;
+  --fl-btn-secondary-border: @fl-btn-secondary-border;
+  --fl-btn-secondary-hover-bg: @fl-btn-secondary-hover-bg;
+  // 输入框聚焦光圈（原来搜面板里写死成蓝色光圈）
+  --fl-focus-ring: fade(@ol-green, 30%);
+  // FIXED: 2026-11-02 编辑器工具栏「AI 助手」开关按钮激活态（跟主色，见 core/css-variables.less）
+  --fl-ai-toggle-active-bg: @fl-ai-toggle-active-bg;
+  --fl-ai-toggle-active-border: @fl-ai-toggle-active-border;
+  --fl-ai-toggle-active-color: @fl-ai-toggle-active-color;
+
+  // Neutral
+  --white: @white;
+  --neutral-10: @neutral-10;
+  --neutral-20: @neutral-20;
+  --neutral-30: @neutral-30;
+  --neutral-40: @neutral-40;
+  --neutral-50: @neutral-50;
+  --neutral-60: @neutral-60;
+  --neutral-70: @neutral-70;
+  --neutral-80: @neutral-80;
+  --neutral-90: @neutral-90;
+
+  // Green
+  --green-10: @green-10;
+  --green-20: @green-20;
+  --green-30: @green-30;
+  --green-40: @green-40;
+  --green-50: @green-50;
+  --green-60: @green-60;
+  --green-70: @green-70;
+
+  // Blue
+  --blue-10: @blue-10;
+  --blue-20: @blue-20;
+  --blue-30: @blue-30;
+  --blue-40: @blue-40;
+  --blue-50: @blue-50;
+  --blue-60: @blue-60;
+  --blue-70: @blue-70;
+
+  // Red
+  --red-10: @red-10;
+  --red-20: @red-20;
+  --red-30: @red-30;
+  --red-40: @red-40;
+  --red-50: @red-50;
+  --red-60: @red-60;
+  --red-70: @red-70;
+
+  // Yellow
+  --yellow-10: @yellow-10;
+  --yellow-20: @yellow-20;
+  --yellow-30: @yellow-30;
+  --yellow-40: @yellow-40;
+  --yellow-50: @yellow-50;
+  --yellow-60: @yellow-60;
+  --yellow-70: @yellow-70;
+
+  // legacy variables
+  --ol-blue: @ol-blue;
+
+  --ol-blue-gray-0: @ol-blue-gray-0;
+  --ol-blue-gray-1: @ol-blue-gray-1;
+  --ol-blue-gray-2: @ol-blue-gray-2;
+  --ol-blue-gray-3: @ol-blue-gray-3;
+  --ol-blue-gray-4: @ol-blue-gray-4;
+  --ol-blue-gray-5: @ol-blue-gray-5;
+  --ol-blue-gray-6: @ol-blue-gray-6;
+
+  // input
+  --input-color: @input-color;
+  --input-border: @input-border;
+  --input-border-radius: @input-border-radius;
+  --input-border-focus: @input-border-focus;
+  --input-border-danger: @state-danger-border;
+  --input-shadow-danger-color: fade(@state-danger-border, 50%);
+
+  // border
+  --btn-border-radius-base: @btn-border-radius-base;
+  --btn-default-bg: @btn-default-bg;
+
+  // text
+  --line-height-base: @line-height-base;
+
+  // toolbar
+  --toolbar-btn-color: @toolbar-btn-color;
+  --editor-toolbar-bg: @editor-toolbar-bg;
+  // FIXED: 2026-11-16 表格插入网格的对比度：原来写死 #E7E9EE（浅灰），
+  // 在柔和主题的米色弹层上几乎看不见格子，用户会以为界面坏了。
+  // 改为从「工具栏前景色」派生：深色工具栏 → 浅线，米色弹层 → 深线，
+  // 四个主题（Default / Light / Soft / IEEE）自动成立，不需要逐主题配。
+  --fl-grid-line: fade(@toolbar-btn-color, 34%);
+  --fl-grid-line-strong: fade(@toolbar-btn-color, 72%);
+  --fl-grid-cell-active-bg: fade(@toolbar-btn-color, 12%);
+}

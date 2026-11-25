@@ -1,0 +1,405 @@
+@menu-bar-height: 39px;
+// FIXED: 2026-10-29 多主题：外壳配色指向主题 token，不再写死深蓝色
+// OLD: @menu-bar-bg: #2c3645;  @menu-item-color: #c9d1d9;  @menu-item-hover-bg: #3d4a5c;
+@menu-bar-bg: @fl-chrome-bg;
+@menu-item-color: @fl-chrome-text-muted;
+@menu-item-hover-bg: @fl-chrome-hover;
+@menu-dropdown-bg: @fl-chrome-bg;
+
+.ide-menu-bar {
+  background-color: @menu-bar-bg;
+  height: @menu-bar-height;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  border-bottom: 1px solid @fl-chrome-border;
+  flex-shrink: 0;
+  width: 100%;
+  // FIXED: 2026-11-06 标题用绝对定位钉在中线上（见 .ide-menu-bar-title）
+  position: relative;
+}
+
+.ide-menu-bar-left {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+// FIXED: 2026-11-07 导航栏左侧第一个位置的产品 LOGO（云朵图标，点击回 /project）
+// 高度跟菜单栏一致（整块都是热区），图标固定 20x20：既和 13px 菜单文字同一基线，
+// 也不会因为 ICO 原始尺寸（64x64）被拉伸而变成一坨。
+.ide-menu-logo {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 8px;
+  flex: 0 0 auto;
+  text-decoration: none;
+
+  &:hover,
+  &:focus {
+    background-color: @menu-item-hover-bg;
+    text-decoration: none;
+  }
+
+  .ide-menu-logo-img {
+    display: block;
+    width: 20px;
+    height: 20px;
+    // 图标本身是方图，圆角让它在深色导航栏上边缘不那么脏
+    border-radius: 3px;
+  }
+}
+
+// FIXED: 2026-11-06 导航栏标题（设置 → 通用 → 导航栏显示标题 = 是）
+// 标题钉在导航栏真正的中线上（菜单区比右侧按钮区宽，flow 布局居中会偏右）。
+// 宽度由 toolbar-header.jsx 里的 useLayoutEffect 按两侧实际空位算好写进 maxWidth，
+// 所以既在正中、也不会盖住菜单或右侧按钮；空位太窄时干脆不渲染。
+// 配色/字号跟菜单一致（13px），标题略微加粗强调；颜色走主题 token，
+// 所以主色调（深底浅字）/ 亮色调（白底深字）/ 柔和色调都能看。
+.ide-menu-bar-title {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  // 菜单之后先留一点空隙，再开始显示标题
+  padding: 0 16px;
+  // JS 算出来的 max-width 优先；量到之前先给个兜底值
+  max-width: calc(100% - 32px);
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: @menu-bar-height;
+  color: @fl-chrome-text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+  // 不参与交互，极窄屏下也挡不住菜单点击
+  pointer-events: none;
+}
+
+// FIXED: 2026-11-18 标题可点击直接改名（设置 → 通用 → 导航栏显示标题 = 是，且有改名权限）
+// 默认的 pointer-events: none 保持不变（窄屏/无权限时依旧不挡菜单）；
+// 只有可改名的标题块恢复交互。它的 max-width 由 JS 按两侧实际空位算好，
+// 不会盖住菜单或右侧按钮，所以恢复交互是安全的。
+.ide-menu-bar-title-editable {
+  pointer-events: auto;
+  cursor: text;
+  border-radius: 3px;
+
+  &:hover,
+  &:focus {
+    background-color: @menu-item-hover-bg;
+    outline: none;
+  }
+
+  // 键盘走到这里时给个可见提示，鼠标 hover 不出现焦点环
+  &:focus-visible {
+    outline: 1px solid @fl-chrome-text-muted;
+    outline-offset: -1px;
+  }
+}
+
+// 改名中的标题：换成输入框，取消左右内边距，把位置留给文字
+.ide-menu-bar-title-editing {
+  pointer-events: auto;
+  padding: 0 4px;
+}
+
+.ide-menu-bar-title-input {
+  box-sizing: border-box;
+  // 行内 width 会覆盖（由原标题宽度算出），再宽也不超外层 max-width
+  max-width: 100%;
+  height: @menu-bar-height;
+  margin: 0;
+  padding: 0 2px;
+  border: none;
+  border-bottom: 1px solid @fl-chrome-text-muted;
+  background-color: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: @menu-bar-height;
+  text-align: center;
+  color: @fl-chrome-text;
+
+  &:focus {
+    outline: none;
+    border-bottom-color: @fl-chrome-text;
+  }
+}
+
+.ide-menu-bar-right {
+  display: flex;
+  align-items: center;
+  height: 100%;
+
+  // FIXED: 2026-11-13 审阅（批注）入口的图标。
+  // 原样式 .review-icon 是 30px 宽、用背景图 + 不可见空格撑开的，在菜单栏按钮里
+  // 会高出按钮、把「审阅」两个字挤开；这里收到 16px 并垂直居中。
+  .review-icon {
+    width: 16px;
+    height: 16px;
+    background-size: 16px 16px;
+    background-position: center;
+    margin-right: 2px;
+    flex: 0 0 auto;
+  }
+
+  .toolbar-item {
+    border-left: 1px solid @fl-chrome-border;
+    border-right: none;
+    height: 100%;
+    margin: 0;
+
+    .btn-full-height {
+      border: none;
+      height: 100%;
+      color: @menu-item-color;
+      padding: 0 10px;
+      font-size: 13px;
+      background: transparent;
+      display: flex;
+      align-items: center;
+
+      &:hover {
+        background-color: @menu-item-hover-bg;
+        color: @fl-chrome-text;
+      }
+
+      .toolbar-label {
+        font-size: 12px;
+        margin-left: 4px;
+        display: none;
+
+        @media (min-width: @screen-md-min) {
+          display: inline-block;
+        }
+      }
+
+      .fa {
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+.toolbar-with-menu-bar {
+  flex-direction: column !important;
+  height: auto !important;
+
+  .toolbar-content {
+    display: none !important;
+  }
+}
+
+.ide-menu-bar-inner {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.ide-menu-dropdown {
+  height: 100%;
+  display: flex;
+  align-items: center;
+
+  .dropdown-toggle {
+    height: 100%;
+  }
+}
+
+.ide-menu-toggle {
+  background: transparent !important;
+  border: none !important;
+  color: @menu-item-color !important;
+  padding: 0 12px !important;
+  height: 100%;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+
+  &:hover,
+  &:focus,
+  &:active,
+  &.open {
+    background-color: @menu-item-hover-bg !important;
+    color: @fl-chrome-text !important;
+  }
+
+  .caret {
+    margin-left: 4px;
+  }
+}
+
+.ide-menu-dropdown-menu {
+  background-color: @menu-dropdown-bg;
+  border: 1px solid @fl-chrome-border;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  min-width: 200px;
+  padding: 4px 0;
+  z-index: 10000;
+
+  > li > a {
+    color: @menu-item-color;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    &:hover {
+      background-color: @menu-item-hover-bg;
+      color: @fl-chrome-text;
+    }
+
+    .fa,
+    .material-icons {
+      margin-right: 8px;
+      width: 16px;
+      text-align: center;
+    }
+  }
+
+  .divider {
+    background-color: @fl-chrome-border;
+    margin: 4px 0;
+  }
+}
+
+.ide-menu-shortcut {
+  color: #6e7681;
+  font-size: 12px;
+  margin-left: auto;
+}
+
+.ide-ai-modal {
+  // FIXED: 2026-10-30 弹窗高度原来随内容无限增长，长文本会顶出视口且无法滚动。
+  // 改成定高（视口 - 上下留白），body 内部滚动，头尾始终可见。
+  .modal-dialog {
+    width: 760px;
+    max-width: calc(100vw - 40px);
+  }
+
+  .modal-content {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 80px);
+    background-color: @fl-chrome-bg;
+    color: @fl-chrome-text-muted;
+
+    .modal-header {
+      border-bottom-color: @fl-chrome-border;
+
+      .close {
+        color: @fl-chrome-text-muted;
+        opacity: 0.7;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+
+    .modal-footer {
+      border-top-color: @fl-chrome-border;
+    }
+  }
+
+  // FIXED: 2026-10-30 翻译弹窗的目标语言选择行
+  .modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  // FIXED: 2026-11-01 「内容已复制到剪贴板」原来直接用 bootstrap 的 .alert-info，
+  // 底色写死 @ol-blue，亮色调（绿）/ 柔和色调（陶土）里都是一块蓝的。
+  // 改走 @fl-alert-success-*，跟着各主题的主色走。
+  // 只换颜色，内边距/间距沿用 bootstrap 的 .alert，主色调像素不变
+  .alert {
+    background-color: @fl-alert-success-bg;
+    border-color: @fl-alert-success-border;
+    color: @fl-alert-success-text;
+  }
+
+  // 模型返回的是纯文本：保留换行/缩进，否则一大段全粘在一起
+  .ide-ai-modal-content {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+  }
+
+  .modal-footer {
+    flex: 0 0 auto;
+  }
+
+  .ide-ai-modal-language {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid @fl-chrome-border;
+
+    label {
+      margin: 0;
+      font-weight: normal;
+      color: @fl-chrome-text-muted;
+    }
+
+    select {
+      padding: 4px 8px;
+      border: 1px solid @fl-border;
+      border-radius: @border-radius-small;
+      background-color: @fl-surface;
+      color: @fl-text;
+      font-size: @font-size-small;
+    }
+  }
+}
+
+.editor-dark {
+  .ide-menu-bar {
+    background-color: darken(@editor-dark-background-color, 3%);
+    border-bottom-color: @editor-dark-toolbar-border-color;
+  }
+
+  .ide-menu-toggle {
+    &:hover,
+    &:focus,
+    &:active {
+      background-color: lighten(@editor-dark-background-color, 5%) !important;
+    }
+  }
+
+  .ide-menu-dropdown-menu {
+    background-color: @editor-dark-background-color;
+    border-color: @editor-dark-toolbar-border-color;
+
+    > li > a {
+      &:hover {
+        background-color: lighten(@editor-dark-background-color, 5%);
+      }
+    }
+
+    .divider {
+      background-color: @editor-dark-toolbar-border-color;
+    }
+  }
+
+  .ide-menu-bar-right {
+    .toolbar-item {
+      border-left-color: @editor-dark-toolbar-border-color;
+
+      .btn-full-height:hover {
+        background-color: lighten(@editor-dark-background-color, 5%);
+      }
+    }
+  }
+}

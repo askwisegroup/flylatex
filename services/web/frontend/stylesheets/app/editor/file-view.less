@@ -1,0 +1,130 @@
+// FIXED: 2026-11-08 .md 复用 MarkdownPreview（自带工具条）时：
+//   1) 去掉外层留白——工具条贴顶部/左侧，和编辑器里一致
+//   2) 固定高度 + 外层不滚动——否则往下滚时工具条会被一起带走
+//      （编辑器里工具条是 CM6 的 panel，永远钉在顶部；这里必须让只有正文滚动）
+// 图片/PDF/.txt 等其它类型的规则一行未动。
+// FIXED: 2026-11-08 .md 复用 MarkdownPreview 时的布局：
+// 工具条固定、正文是**独立的滚动容器**（滚动条长在正文上，不是长在整个面板上）。
+// 做法：每一层都建成纵向 flex，并用 flex: 1 1 auto + min-height: 0 逐层传递剩余高度，
+// 最后由 .markdown-preview-body 自己 overflow: auto 承担滚动。
+// 不用百分比高度（依赖祖先必须有确定高度，任何一环缺失就整条链失效）。
+.file-view.file-view-markdown {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  // FIXED: 2026-11-08 FileViewText 的根 div（无类名时高度是 auto，会吞掉
+  // 传下来的剩余高度，这正是前面几次滚不动的真正原因）→ 让它也进 flex 链
+  .file-view-text-root {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .text-preview {
+    margin-top: 0;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .markdown-preview {
+      flex: 1 1 auto;
+      min-height: 0;
+      text-align: left;
+
+      // 工具条不参与伸缩；正文吃掉剩余高度并自己滚动
+      .markdown-preview-hint {
+        flex: 0 0 auto;
+      }
+
+      .markdown-preview-body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: auto;
+      }
+
+      // 编辑器里那条 48rem 居中栏在这儿不需要（面板本来就窄）
+      .markdown-preview-body > * {
+        max-width: none;
+      }
+    }
+  }
+}
+
+.file-view,
+.binary-file {
+  padding: @line-height-computed / 2;
+  background-color: @gray-lightest;
+  text-align: center;
+  overflow: auto;
+  img,
+  .file-view-pdf {
+    max-width: 100%;
+    max-height: 90%;
+    display: block;
+    margin: auto;
+    margin-top: @line-height-computed / 2;
+    border: 1px solid @gray;
+    .box-shadow(0 2px 3px @gray;);
+    background-color: white;
+  }
+  .file-view-pdf {
+    overflow: auto;
+    width: max-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .pdf-page:not(:last-of-type) {
+      border-bottom: 1px solid @gray;
+    }
+  }
+  p.no-preview {
+    margin-top: @line-height-computed / 2;
+    font-size: 24px;
+    color: @gray;
+  }
+  .text-loading {
+    margin-top: @line-height-computed / 2;
+    font-size: 24px;
+    color: @gray;
+  }
+  .text-preview {
+    margin-top: @line-height-computed / 2;
+    .scroll-container {
+      background-color: white;
+      font-size: 0.8em;
+      line-height: 1.1em;
+      overflow: auto;
+      border: 1px solid @gray-lighter;
+      padding-left: 12px;
+      padding-right: 12px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      text-align: left;
+      white-space: pre;
+      font-family: monospace;
+    }
+  }
+  // FIXED: 2026-11-08 file-view 里的 .md 直接复用 MarkdownPreview（doc 的可视化
+  // 编辑器那一整块），所以这里只修两处继承关系，不新增任何排版规则：
+  //   1) .file-view 整体是 text-align: center（给图片/PDF 用的），会把工具条文字
+  //      和 Markdown 正文/列表一起居中（列表点还会跟文字分家）→ 拉回左对齐
+  //   2) 编辑器里那条 48rem 居中栏 + 大片内边距是为覆盖编辑器准备的，
+  //      文件视图本身就窄，去掉更自然
+  .markdown-preview {
+    text-align: left;
+  }
+
+  .markdown-preview-body {
+    > * {
+      max-width: none;
+    }
+  }
+  .linked-file-icon {
+    color: @blue;
+  }
+}

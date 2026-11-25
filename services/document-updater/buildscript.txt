@@ -1,0 +1,9 @@
+document-updater
+--dependencies=mongo,redis
+--docker-repos=gcr.io/overleaf-ops
+--env-add=
+--env-pass-through=
+--esmock-loader=False
+--node-version=18.18.2
+--public-repo=True
+--script-version=4.4.0

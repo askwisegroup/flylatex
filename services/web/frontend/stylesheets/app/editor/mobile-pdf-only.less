@@ -1,0 +1,283 @@
+// ============================================================
+// 移动端编辑器：四档 Tab（文件 / 源码 / 预览 / AI 助手）
+// ------------------------------------------------------------
+// 历史和背景：
+//   阶段 1 是「轻量只读」—— 手机上把布局钉死在单栏 PDF，文件树、编辑器、
+//   菜单全藏掉，只能编译 / 看日志 / 下载。结果是：导入的项目一旦主文件没
+//   选对，手机上既改不了文件也改不了主文件，编译不出来 → AI 助手没有产物，
+//   直接死锁。
+//   阶段 2（本文件当前形态）只加一个切换器，把「同一份布局」按档位显示：
+//     ui.mobileTab = files   -> 文件树占满屏（ui.view = 'editor'）
+//     ui.mobileTab = source  -> 编辑器占满屏（ui.view = 'editor'）
+//     ui.mobileTab = preview -> 单栏 PDF     （ui.view = 'pdf'）
+//     ui.mobileTab = agent   -> 上面盖 AI 浮层（复用 codemirror-ai-chat 的
+//                              mobileViewport 分支，ui.view 仍是 'pdf'）
+//   布局状态由 frontend/js/ide.js 的 applyMobileTab() 维护，这里只负责
+//   「哪一栏该露出来」以及底部切换条的样子。
+//
+// 全部规则都在 max-width: @screen-xs-max 里 + fl-mobile-tab-* 前缀，
+// 桌面端（>= 768px）零影响。要整体回退：删掉本文件和 app/editor.less 里的
+// @import，并把 ide.js 里 applyMobileTab 那段删掉即可。
+// ============================================================
+
+@fl-mobile-tab-bar-height: 56px;
+
+@media (max-width: @screen-xs-max) {
+  .editor {
+    // ----------------------------------------------------------
+    // 底部切换条
+    // ----------------------------------------------------------
+    // #chat-wrapper 是 .full-size（absolute inset:0）的 jquery-layout 容器：
+    // 把它的 bottom 抬起来，整个编辑器（含顶部工具栏、PDF 画布）就都落在
+    // 切换条之上，不会出现「PDF 最后一页被条子盖住一截」。
+    // 高度要算准，否则 PDF 底部 / 文件树最后一行会被切换条压住：
+    // 切换条总高 = @fl-mobile-tab-bar-height（内容）+ 1px 上边框 + iPhone 的底部安全区
+    #chat-wrapper {
+      // 注意：不要把 calc() 拆成多行、也不要在里面用 @{var} 插值 ——
+      // Less 会把它当成 media 特性解析，报 “media definitions require block
+      // statements” 这种完全不指向现场的错。
+      @fl-safe-area: env(safe-area-inset-bottom, 0px);
+      bottom: calc(@fl-mobile-tab-bar-height + 1px + @fl-safe-area);
+    }
+
+    .fl-mobile-tabs {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 900; // 高于各 pane（11 级），低于模态框（1050+）和 AI 浮层（10000）
+      display: flex;
+      align-items: stretch;
+      // 用 min-height 而不是 height：iPhone 的底部安全区靠 padding 撑在内容下面，
+      // 写死 height 会把四个按钮挤扁而不是把条子加高。
+      min-height: @fl-mobile-tab-bar-height;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+      background: var(--fl-surface);
+      border-top: 1px solid var(--fl-border);
+    }
+
+    .fl-mobile-tab {
+      flex: 1 1 0;
+      min-width: 0;
+      min-height: @fl-mobile-tab-bar-height;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 4px 2px;
+      border: 0;
+      border-radius: 0;
+      background: none;
+      color: var(--fl-text-muted);
+      font-size: 11px;
+      line-height: 1.2;
+
+      &:hover,
+      &:focus {
+        background: none;
+        color: var(--fl-text);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--fl-link);
+        outline-offset: -2px;
+      }
+
+      &.is-active {
+        color: var(--fl-link);
+
+        &:hover,
+        &:focus {
+          color: var(--fl-link);
+        }
+      }
+    }
+
+    .fl-mobile-tab-icon {
+      display: flex;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .fl-mobile-tab-label {
+      max-width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    // ----------------------------------------------------------
+    // #ide-body：文件树（west）/ 编辑器（center）/ 侧边聊天（east）
+    // ----------------------------------------------------------
+    #ide-body {
+      // jquery-layout 的分隔条和折叠把手：手机上没法拖，也不该占位
+      .ui-layout-resizer-west,
+      .ui-layout-resizer-west-closed,
+      .ui-layout-resizer-east,
+      .ui-layout-resizer-east-closed,
+      .custom-toggler-west,
+      .custom-toggler-east {
+        display: none !important;
+      }
+
+      // 侧边聊天全程不显示：手机上 AI 走全屏浮层（见「AI 助手」档）
+      .ui-layout-east {
+        display: none !important;
+      }
+
+      // 中间 pane 被 jquery-layout 用内联 left / width 钉住（left = 西栏宽度、
+      // width = 西栏剩下的那半），这里拉回全宽：
+      // left/right = 0 定位置，width: auto 把可能存在的内联宽度废掉
+      //（只写 left:0 时，在手机上 PDF 会只占右半屏，左边留一条空白）。
+      .ui-layout-center {
+        left: 0 !important;
+        right: 0 !important;
+        width: auto !important;
+        max-width: none !important;
+      }
+
+      // 默认（预览 / AI 助手，以及 mobileTab 还没落地的第一帧）：文件树不占位
+      .ui-layout-west {
+        display: none !important;
+      }
+
+      // FIXED: 2026-11-10 手机端不要大纲，整块隐藏。
+      //
+      // 之前是「默认收起」—— 但 jquery-layout 在容器隐藏时初始化不了，
+      // sizePane('south','auto') 会被静默丢弃，于是收起后栏位仍是 350px，
+      // 下面留一整块空白，文件树一点没长高（等于没收起）。
+      // 小屏幕上文件树才是主角，大纲可有可无，直接不显示最省事也最彻底：
+      // 不依赖 layout 的初始化时机，也不占高度。
+      .outline-container,
+      .vertical-resizable-resizer {
+        display: none !important;
+      }
+
+      // 大纲没了以后，让文件树吃掉整条侧栏。
+      //
+      // 这里必须把 top / bottom 一起压回 0，只覆盖 height 是不够的：
+      // jquery-layout 给 center pane（也就是 .file-tree）写的是内联
+      // position:absolute + top + bottom + height（见 jquery-layout.js 的
+      // sizeMidPanes → calcNewCenterPaneDims），其中 bottom = 大纲高(350px) + 分隔条。
+      // 大纲被 display:none 之后那 350px 没人接手，而 top:0 与 bottom:356px 同时
+      // 存在时，height:auto 只能让它长到「整高 - 356px」→ 文件区正好占上半屏、
+      // 下半屏一整块空白。
+      // top:0 + bottom:0 + height:auto = 拉伸拉满。
+      .file-tree {
+        flex: 1 1 auto;
+        top: 0 !important;
+        bottom: 0 !important;
+        height: auto !important;
+        max-height: none !important;
+      }
+    }
+  }
+
+  // 下面两条不能写在 .editor { } 里面：fl-mobile-tab-* 类挂在 <body> 上，
+  // 嵌进 .editor 会生成 `.editor body.fl-mobile-tab-*`（永远匹配不到，实测过）。
+  //
+  // 「文件」档：文件树占满屏，编辑器那栏临时让位（display:none，不是 visibility，
+  // 否则 CodeMirror 还会占着布局、点到看不见的代码）。切回「源码」时 CM6 会靠
+  // 自己的 ResizeObserver 重新量宽度，不需要手动 refresh。
+  body.fl-mobile-tab-files .editor #ide-body {
+    .ui-layout-west {
+      display: block !important;
+      left: 0 !important;
+      right: 0 !important;
+      width: auto !important;
+      max-width: none !important;
+    }
+
+    .ui-layout-center {
+      display: none !important;
+    }
+  }
+
+  // 「源码」档：编辑器占满屏（.ui-layout-center 已经在上面拉过全宽）
+  body.fl-mobile-tab-source .editor #ide-body .ui-layout-west {
+    display: none !important;
+  }
+
+  // ------------------------------------------------------------
+  // FIXED: 2026-11-18 右上角的「审阅」入口只在「源码」档出现。
+  //
+  // 审阅（行内批注 / 修订模式）是编辑器那半边的东西：文件 / 预览 / AI 助手
+  // 三档里 #ide-body 的编辑器栏根本不显示（见上面 ui-layout-center 那几条），
+  // 按钮还在、点了却什么都不出现 —— 看起来像坏了。这里按档位隐掉。
+  //
+  // 两个入口都挂着 ide-review-entry：菜单栏右侧那个（toolbar-header.jsx）和
+  // 老工具栏里的 TrackChangesToggleButton（菜单栏特性关掉时才看得到）。
+  // 用「只在三个非源码档位隐藏」而不是 body:not(.fl-mobile-tab-source)：
+  // 后者在 ?desktop=1（手机宽度走桌面布局、body 没有 fl-mobile-tab-* 类）时
+  // 也会把按钮隐藏掉，那是行为回退。
+  // ------------------------------------------------------------
+  body.fl-mobile-tab-files .ide-review-entry,
+  body.fl-mobile-tab-preview .ide-review-entry,
+  body.fl-mobile-tab-agent .ide-review-entry {
+    display: none !important;
+  }
+
+  .editor {
+    // ----------------------------------------------------------
+    // 顶部菜单栏里的下拉菜单（文件 / 编辑 / AI / 工具 / Git / 帮助）：
+    // 手机上排不下。保留左侧 LOGO 和右侧的「分享」，只把下拉收掉。
+    // 「排版」下拉同样没有意义（手机上恒为单栏），一并隐藏。
+    // ----------------------------------------------------------
+    #ide-menu-file,
+    #ide-menu-edit,
+    #ide-menu-ai,
+    #ide-menu-tools,
+    #ide-menu-git,
+    #ide-menu-help,
+    #layout-dropdown {
+      display: none !important;
+    }
+
+    // SyncTeX 的「跳到 PDF / 跳到源码」两颗圆形按钮（@fl-synctex-control-bg 那个
+    // 陶土色圆钮）：手机上恒为单栏，PDF 和源码不同屏，点了根本看不到对面高亮到
+    // 哪一行；它们又是 absolute 定位在代码行号左边，直接压在正文上。
+    // 限定在 #ide-body 里：`.horizontal-resize-handle .synctex-controls` 是
+    // 「独立 PDF 窗口」那一套，别误伤。
+    #ide-body .synctex-controls {
+      display: none !important;
+    }
+
+    // PDF 工具栏只留「编译 / 日志 / 下载」：
+    // 右侧（代码检查、切回编辑器）在手机上要么点不到结果，要么已经被
+    // 底部 Tab 取代，隐藏以免误触。
+    .toolbar-pdf .toolbar-pdf-right {
+      display: none !important;
+    }
+
+    // AI 助手：2026-11-01 起 PDF 工具栏里那颗按钮只在手机上显示过（唯一入口），
+    // 现在入口是底部 Tab，ai-chat.less 里的 .fl-pdf-ai-button 已经全端 display:none，
+    // 这里不用再写一遍 —— 留着反而会和那边的注释互相打脸。
+
+    // 顶部连接状态条（“丢失连接. xx 秒后重新连接. 立刻重连” 等）：
+    // 原来 `.global-alerts .alert` 写死 `min-width: 400px`（按桌面留的），
+    // 手机屏宽 360 时整条比屏幕还宽，右边的「立刻重连」被裁掉一半。
+    // 这里只在 xs 下：按屏宽收缩 + 文案自然换行 + 按钮不再浮动（否则会被挤出屏幕）。
+    .global-alerts .alert {
+      min-width: 0;
+      max-width: calc(100% - 12px);
+      box-sizing: border-box;
+      padding: 8px 10px;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: normal;
+      overflow-wrap: anywhere;
+
+      .pull-right {
+        float: none !important;
+        margin-left: 8px;
+        white-space: nowrap;
+      }
+    }
+
+    #try-reconnect-now-button,
+    #synctex-more-info-button {
+      margin-left: 8px;
+    }
+  }
+}

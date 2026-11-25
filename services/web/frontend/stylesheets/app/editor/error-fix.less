@@ -1,0 +1,200 @@
+// FIXED: 2026-11-16 「编译错误一键修复」建议面板 + 每条错误下面的入口按钮
+//
+// 面板是 .logs-pane-content 里的整宽区块（在底部动作行之上）；
+// 颜色走 --fl-* 主题变量，四个主题各自取色。
+
+// FIXED: 2026-11-16 面板不再放在 .logs-pane-actions（右对齐小容器）里，
+// 而是作为 .logs-pane-content 的普通整宽区块 —— 从容器左边界开始画，永不裁切。
+// 详见 compile-error-fix/pdf-ai-fix-panel.tsx 的注释。
+.fl-error-fix-panel {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  background: var(--fl-surface, #fff);
+  border: 1px solid var(--fl-border, #d7dde6);
+  border-radius: 8px;
+  text-align: left;
+}
+
+.fl-error-fix-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.fl-error-fix-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fl-text, #1f2937);
+}
+
+.fl-error-fix-close {
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--fl-text-subtle, #8a94a3);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--fl-text, #1f2937);
+  }
+}
+
+.fl-error-fix-notice {
+  margin-bottom: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--fl-text-muted, #6b7785);
+
+  &--ok {
+    margin-top: 8px;
+    color: #1a7f37;
+  }
+}
+
+.fl-error-fix-item {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--fl-border, #e6ebf1);
+
+  &:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+}
+
+.fl-error-fix-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.fl-error-fix-file {
+  padding: 0;
+  background: transparent;
+  font-size: 12px;
+  color: var(--fl-text, #1f2937);
+  word-break: break-all;
+}
+
+.fl-error-fix-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+
+.fl-error-fix-accept,
+.fl-error-fix-reject {
+  padding: 2px 10px;
+  font-size: 12px;
+  line-height: 18px;
+  border-radius: @border-radius-small;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.fl-error-fix-accept {
+  color: #fff;
+  background: @btn-primary-bg;
+  border: 1px solid @btn-primary-bg;
+}
+
+.fl-error-fix-reject {
+  color: var(--fl-text-muted, #6b7785);
+  background: transparent;
+  border: 1px solid var(--fl-border, #d7dde6);
+}
+
+.fl-error-fix-done {
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: #1a7f37;
+}
+
+.fl-error-fix-diff {
+  min-width: 0;
+  overflow-x: auto;
+  font-size: 12px;
+  line-height: 1.6;
+  border: 1px solid var(--fl-border, #e6ebf1);
+  border-radius: 6px;
+}
+
+.fl-error-fix-diff-line {
+  display: flex;
+  gap: 6px;
+  padding: 1px 8px;
+  white-space: pre;
+
+  code {
+    padding: 0;
+    background: transparent;
+    font-size: 12px;
+    color: inherit;
+  }
+}
+
+.fl-error-fix-diff-marker {
+  flex: 0 0 auto;
+  opacity: 0.6;
+  user-select: none;
+}
+
+.fl-error-fix-diff-remove {
+  color: #a12622;
+  background: fade(#a12622, 8%);
+}
+
+.fl-error-fix-diff-add {
+  color: #1a7f37;
+  background: fade(#1a7f37, 8%);
+}
+
+.fl-error-fix-reason {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--fl-text-muted, #6b7785);
+}
+
+.logs-pane-actions-fix-with-ai {
+  .no-outline-ring-on-click;
+  margin-right: @margin-sm;
+}
+
+// FIXED: 2026-11-16 每条 error 下面的「AI 修复」入口（Pro 也是这么放的：
+// 用户看到的第一处错误旁边就有按钮，不用滑到面板底部找）
+.fl-error-fix-entry-action {
+  display: flex;
+  justify-content: flex-start;
+  margin: -4px 0 8px 4px;
+}
+
+.fl-error-fix-entry-btn {
+  padding: 1px 8px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--fl-link, #1a73e8);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: @border-radius-small;
+  cursor: pointer;
+
+  &:hover {
+    background: fade(#1a73e8, 8%);
+    border-color: fade(#1a73e8, 24%);
+  }
+}

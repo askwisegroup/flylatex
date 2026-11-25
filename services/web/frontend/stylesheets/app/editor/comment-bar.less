@@ -1,0 +1,104 @@
+// FIXED: 2026-11-16 选区旁的浮动「加批注」按钮
+//
+// body portal + position: fixed，不参与编辑器布局；位置由 coordsAtPos 实时算。
+// 颜色走 --fl-* 变量（三主题统一定义在 variables/css-variables.less）。
+
+.fl-comment-bar {
+  position: fixed;
+  z-index: 19920; // 低于命令面板（20000）/符号面板（19900 之上一点），高于编辑器
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  background: var(--fl-surface, #fff);
+  border: 1px solid var(--fl-border, #d7dde6);
+  // STYLE: 2026-11-19 浮动工具条由药丸改为小圆角
+  border-radius: @border-radius-base;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
+  overflow: hidden;
+}
+
+.fl-comment-bar-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border: 0;
+  background: transparent;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--fl-text, #1f2937);
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--fl-surface-raised, #f1f5f9);
+  }
+}
+
+.fl-comment-bar-icon {
+  font-size: 12px;
+  line-height: 1;
+  color: @btn-primary-bg;
+}
+
+// 移动端触摸选区另有一套交互，v1 先不叠加
+@media (max-width: @screen-xs-max) {
+  .fl-comment-bar {
+    display: none;
+  }
+}
+
+// FIXED: 2026-11-16 选区里有修订时，浮动条追加「接受 / 拒绝」
+.fl-comment-bar-divider {
+  width: 1px;
+  height: 14px;
+  margin: 0 2px;
+  background: var(--fl-border, #d7dde6);
+}
+
+.fl-comment-bar-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--fl-text, #1f2937);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--fl-surface-raised, #f1f5f9);
+  }
+}
+
+.fl-comment-bar-accept:hover {
+  color: #1a7f37;
+}
+
+.fl-comment-bar-reject:hover {
+  color: #a12622;
+}
+
+// FIXED: 2026-11-16 浮条上的「问 AI」用强调色，和「加批注」区分开
+.fl-comment-bar-ask-ai {
+  color: @btn-primary-bg;
+
+  &:hover {
+    background: fade(@btn-primary-bg, 10%);
+  }
+}
+
+// FIXED: 2026-11-17 「插入引用」图标换成放大镜（见 comment-bar.tsx），
+// 配色跟「问 AI」一致：两者都是「把选区带出去干活」的动作，视觉上应该同级。
+// 原来它走 --fl-text（普通文字色），看着像次要装饰。
+.fl-comment-bar-cite {
+  color: @btn-primary-bg;
+
+  &:hover {
+    background: fade(@btn-primary-bg, 10%);
+  }
+}

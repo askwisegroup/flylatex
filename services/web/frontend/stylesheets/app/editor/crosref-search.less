@@ -1,0 +1,95 @@
+// 「搜索参考文献」弹窗（CM6 的 CrosRefSearch 扩展）里的单选框 / 复选框
+// FIXED: 2026-11-01 这些是浏览器**原生**控件（<input type="radio" / "checkbox">），
+// 颜色不由任何 LESS 决定 —— 亮色调（绿）、柔和色调（陶土）里都还是一颗系统蓝点，
+// 跟弹窗里其它已经跟随主题的元素格格不入。
+// accent-color 让原生控件取主题主色：Chrome 93+ / Safari 15.4+ / Firefox 92+，
+// 老浏览器忽略该属性、保持原样，不会出问题。
+.search-references-modal {
+  input[type='radio'],
+  input[type='checkbox'] {
+    accent-color: @ol-green;
+    cursor: pointer;
+  }
+}
+
+// FIXED: 2026-11-16 「搜索范围」四个来源：一排等间距，换行后左对齐。
+// 原来用 bootstrap 的 radio-inline，每个都带左右 margin，第 4 个（Zotero）掉到
+// 第二行时缩进不对，看着像没对齐。
+.crossref-region-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 20px;
+
+  .radio,
+  .radio-inline {
+    margin: 0;
+    padding-top: 0;
+    white-space: nowrap;
+  }
+}
+
+// FIXED: 2026-11-17 结果一多，整个弹窗就超出视口，「关闭」按钮被顶到屏幕外。
+// 根因：bootstrap 3 的 .modal 是「整页滚动容器」（overflow-y: scroll），
+// .modal-body 高度不设限 —— 内容越长对话框越长，footer 跟着往下走。
+// 做法：给 .modal-body 一个「视口高度 - 页头页脚与外边距」的 max-height，
+// 让它内部变成纵向 flex：上面的条件区/按钮保持自身高度，只有「结果表」那一块
+// 收缩（min-height: 0），于是列表再长也只是表格内部滚动，footer 永远在视口内。
+// 短列表时 max-height 不生效，弹窗仍是内容高度，不会撑成满屏。
+.search-references-modal {
+  // FIXED: 2026-11-17 弹窗宽度撑开。
+  // 组件里写的是 size="xl"，但 react-bootstrap 0.33 只会生成 class="modal-xl"，
+  // 而 bootstrap 3 只定义了 modal-lg(900px) / modal-sm，于是实际宽度一直是
+  // @modal-md = 600px —— 6 列的文献表格挤在 600px 里，标题被压成一列字。
+  // 这里不用 size（避免与 .modal-lg 的媒体查询打架），直接用选择器限定宽度：
+  // 大屏最宽 1100px，中小屏占满「视口 - 60px 外边距」。
+  @media (min-width: 768px) {
+    .modal-dialog {
+      width: auto;
+      max-width: 1100px;
+      // BS3 原本就是 margin: 30px auto，配合 width: auto 即水平居中
+    }
+  }
+
+  .modal-body {
+    // 210px ≈ 页头(60) + 页脚(65) + 上下 30px 外边距 + 余量
+    max-height: calc(~'100vh - 210px');
+    // 弹性排版的兜底：条件区本身很高时 body 自己滚，不至于裁掉内容
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  // Modal.Body 里那层 wrapper：让「结果表」成为唯一能收缩的孩子
+  .modal-body > div {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  // FIXED: 2026-11-17 表头固定，表体滚动。
+  // 滚动容器是结果表外面那层 div（TABLE_CONTAINER_STYLE），thead th 粘在它顶部。
+  // bootstrap 的 .table-bordered 是 border-collapse: collapse，粘住的 th 在 Chrome
+  // 里会丢边框（边框画在表格边缘、随内容滚走），所以用 inset box-shadow 补一条底线。
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background-color: var(--fl-surface-raised, #f5f5f5);
+    background-clip: padding-box;
+    box-shadow: inset 0 -1px 0 var(--fl-border, #ddd);
+  }
+
+  // 小屏：外边距只有 10px，页头页脚也更矮，少留一点余量
+  @media (max-width: 767px) {
+    .modal-body {
+      max-height: calc(~'100vh - 150px');
+    }
+
+    .modal-body > div {
+      display: block;
+    }
+  }
+}

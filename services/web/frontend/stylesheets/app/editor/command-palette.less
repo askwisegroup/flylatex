@@ -1,0 +1,113 @@
+// FIXED: 2026-11-13 命令面板（Ctrl/Cmd+K）
+//
+// 定位在视口上方 12%，像 Spotlight；不是模态 —— 点遮罩即可关闭。
+// 颜色全部走 --fl-* 变量，浅色 / 柔和 / 深色主题自动适配。
+
+.cm-command-palette-backdrop {
+  position: fixed;
+  inset: 0;
+  // 必须高于 AI 聊天浮层（ai-chat.pug 里是 10000）和菜单下拉（ide-menu-bar 10000），
+  // 否则会被那两个停靠箭头压住。
+  z-index: 20000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 12vh 16px 16px;
+  background: rgba(15, 23, 42, 0.18);
+}
+
+.cm-command-palette {
+  // 注意：不能写 min(640px, 92vw) —— Less 有同名内置函数，会去求值并报
+  // "Error evaluating function `min`: incompatible types"（px 和 vw 不兼容）。
+  // 用固定宽度 + max-width 表达同一个意思。
+  width: 640px;
+  max-width: 92vw;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--fl-surface, #ffffff);
+  border: 1px solid var(--fl-border, #d7dde6);
+  border-radius: 10px;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.24);
+  overflow: hidden;
+}
+
+.cm-command-palette-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border: none;
+  border-bottom: 1px solid var(--fl-border, #e6ebf1);
+  outline: none;
+  background: transparent;
+  color: var(--fl-text, #1f2937);
+  font-size: 15px;
+
+  &::placeholder {
+    color: var(--fl-text-muted, #94a3b8);
+  }
+}
+
+.cm-command-palette-results {
+  overflow-y: auto;
+  padding: 6px 0;
+}
+
+.cm-command-palette-group-title {
+  padding: 8px 16px 4px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fl-text-muted, #94a3b8);
+}
+
+.cm-command-palette-item {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 16px;
+  cursor: pointer;
+  color: var(--fl-text, #1f2937);
+  font-size: 14px;
+
+  // 选中态：用主题强调色 @ol-green 的 14% 填充 + 左侧竖条。
+  //
+  // 为什么不用 CSS 变量 --fl-btn-secondary-hover-bg（第一版踩的坑）：
+  // 三个主题的值分别是
+  //   light  #38404d   ieee  #1a2e42   soft  #f0ebdf
+  // 前两个是**深色**，叠上文字色 --fl-text(#333) 就是深字压深底，
+  // 截图里「审阅」那行完全读不出来。
+  //
+  // 也不用写死的 rgba 蓝：soft 主题的强调色是赭红，写死蓝会跟主题打架。
+  // @ol-green 在三个主题里分别是蓝 / 赭红 / 墨绿，所以这里用 Less 计算，
+  // 每个主题的 CSS 包里编出各自的颜色（已用 lessc 分别验证）。
+  // 文字色不动，继续继承 --fl-text：14% 的浅色填充上一定够对比。
+  &.active {
+    background: fade(@ol-green, 14%);
+    box-shadow: inset 2px 0 0 @ol-green;
+  }
+}
+
+.cm-command-palette-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cm-command-palette-hint {
+  flex: 0 0 auto;
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--fl-text-muted, #94a3b8);
+}
+
+.cm-command-palette-empty {
+  padding: 18px 16px;
+  font-size: 13px;
+  color: var(--fl-text-muted, #94a3b8);
+}

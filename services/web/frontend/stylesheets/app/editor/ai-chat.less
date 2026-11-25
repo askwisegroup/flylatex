@@ -1,0 +1,1087 @@
+// AI Chat Panel wrapper - CodeMirror panel style
+.ai-chat-panel-wrapper {
+  background-color: @fl-surface;
+  border-top: 1px solid @fl-border;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  // 确保它在 cm-panels 内部时正确显示
+  &.cm-panel {
+    padding: 0;
+  }
+}
+
+// 调整大小的拖拽手柄
+.ai-chat-resize-handle {
+  height: 6px;
+  background: linear-gradient(to bottom, #e0e0e0, #c0c0c0);
+  cursor: ns-resize;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  // 添加视觉指示器（三个小点）
+  &::before {
+    content: '•••';
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: @fl-text-subtle;
+    line-height: 1;
+  }
+
+  &:hover {
+    background: linear-gradient(to bottom, #d0d0d0, #a0a0a0);
+    &::before {
+      color: @fl-text-muted;
+    }
+  }
+}
+
+.ai-chat-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  background-color: @fl-surface;
+}
+
+.ai-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  // FIXED: 2026-11-16 头部改成「和 CodeMirror 工具条一模一样」的一条 bar。
+  // 之前只有 padding: 1px 12px，高度全靠按钮撑（约 30px），底部什么都没有，
+  // 右半边看不出是工具条（左边是 .ol-cm-toolbar / .toolbar-editor）。
+  // OLD: padding: 1px 12px;
+  // OLD: background-color: @fl-chrome-bg;   // 默认主题 #2c3645，比工具条 #2f3a4c 差一档
+  //
+  // 1) 高度：CM 工具条本体是 @editor-toolbar-height(32px)，外面 .cm-panels-top 还有
+  //    1px 下边框（CodeMirror 内置，亮色代码主题下为 #ddd），整条 = 33px。
+  //    这里用 height + content-box 复刻同一个盒子（32px 内容 + 1px 线），
+  //    左右并排时两条底线才落在同一像素行上。
+  // 2) 底色：和工具条取同一个变量（默认 #2f3a4c / 浅色 #fff / 柔和 #efeadd / IEEE 同默认）。
+  // 3) 底线：@fl-border 在默认/浅色/IEEE 主题正好是 #ddd、柔和是 #e0d8c6，与 CM 自带那条线视觉一致。
+  height: @editor-toolbar-height;
+  box-sizing: content-box;
+  padding: 0 12px;
+  background-color: @editor-toolbar-bg;
+  border-bottom: 1px solid @fl-border;
+  color: @fl-chrome-text;
+  flex-shrink: 0;
+}
+
+.ai-chat-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+
+  .fa {
+    font-size: 16px;
+  }
+}
+
+// 当前会话标题（跟在"AI 助手"后面）
+.ai-chat-title-conversation {
+  max-width: 240px;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: normal;
+  color: @fl-chrome-text-muted;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ai-chat-actions {
+  display: flex;
+  gap: 4px;
+
+  .btn-link {
+    padding: 4px 8px;
+    // OLD: color: #c9d1d9;
+    color: @fl-chrome-text-muted;
+    font-size: 14px;
+
+    &:hover {
+      // OLD: color: #fff;
+      color: @fl-chrome-text;
+    }
+  }
+}
+
+// FIXED: 2026-10-30 历史对话：改成弹层菜单（原来是塞在面板里的抽屉，太占地方）
+// FIXED: 2026-10-30 「底部停靠」容器（jquery-layout 的 south 面板内）
+.ai-chat-dock {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.ai-chat-panel-wrapper-docked {
+  border-top: 1px solid @fl-border;
+  background-color: @fl-surface;
+}
+
+// 停靠时高度只有 200~300px，把留白收紧一点，消息区仍然自己滚动
+.ai-chat-panel-wrapper-docked .ai-chat-panel {
+  // FIXED: 2026-11-16 头部改成固定高度（32px 内容 + 1px 底线，见 .ai-chat-header），
+  // 上下各 4px 的内边距会把内容压到 23px、按钮（28px）溢出到线上，不再收紧。
+  // 顺带也更省地方了：原来 4+4 内边距让停靠态头部约 36px，现在整条 33px。
+  // OLD:
+  // .ai-chat-header {
+  //   padding-top: 4px;
+  //   padding-bottom: 4px;
+  // }
+
+  .ai-chat-messages {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .ai-chat-welcome {
+    display: none; // 矮面板里欢迎语只会挤掉消息
+  }
+
+  .ai-chat-input {
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+    textarea {
+      // 矮面板里输入框别长成两行
+      min-height: 32px;
+      max-height: 72px;
+    }
+  }
+}
+
+.ai-conversation-menu {
+  min-width: 280px;
+  max-width: 380px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 4px 0;
+  background-color: @fl-surface;
+  border: 1px solid @fl-border;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+
+  // FIXED: 2026-11-01 单条历史对话高达 71px（标题和条数还被拆成上下两行）的真正原因：
+  // components/dropdowns.less 里有一条
+  //   `.dropdown-menu > li > a, div, .dropdown-menu-button { display: block;
+  //    padding: @dropdown-item-padding; line-height: @line-height-base }`
+  // 中间那个 `div` 是裸选择器，编译成 `.dropdown-menu div`，特异度 0,1,1，
+  // 把这些 0,1,0 的规则全压掉了：flex 行被打回 block（所以标题/条数上下叠），
+  // 每个 div 还白吃一份 4px 20px 内边距和 1.5625 行高。
+  // 所以这里整体多套一层 .ai-conversation-menu（0,2,0），并把 padding 显式归零。
+  // 以后往这个菜单里加 DOM，也必须写在 .ai-conversation-menu { } 里面。
+  .ai-conversation-menu-head {
+    padding: 4px 12px 6px;
+    margin: 0;
+    font-size: 12px;
+    line-height: 16px;
+    color: @fl-text-muted;
+  }
+
+  .ai-conversation-item {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding: 5px 8px 5px 12px;
+    line-height: 16px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: @fl-surface-raised;
+    }
+
+    &.active {
+      background-color: @fl-surface-raised;
+      box-shadow: inset 3px 0 0 @fl-link-bright;
+    }
+  }
+
+  .ai-conversation-item .ai-conversation-item-body {
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+    padding: 0;
+    line-height: 16px;
+  }
+
+  .ai-conversation-item .ai-conversation-item-title {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    overflow: hidden;
+    font-size: 13px;
+    line-height: 16px;
+    color: @fl-text;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .ai-conversation-item .ai-conversation-item-meta {
+    flex: none;
+    padding: 0;
+    font-size: 11px;
+    line-height: 16px;
+    color: @fl-text-subtle;
+    white-space: nowrap;
+  }
+
+  .ai-conversation-item-delete {
+    padding: 2px 6px;
+    line-height: 16px;
+    color: @fl-text-subtle;
+    opacity: 0;
+
+    &:hover {
+      color: @brand-danger;
+    }
+
+    .ai-conversation-item:hover & {
+      opacity: 1;
+    }
+  }
+
+  // FIXED: 2026-10-30 空态文案（「还没有历史对话」）原来一条样式都没有
+  .ai-conversation-empty {
+    padding: 6px 12px;
+    margin: 0;
+    font-size: 13px;
+    line-height: 16px;
+    color: @fl-text-subtle;
+  }
+}
+
+// 删除确认弹窗里显示的对话标题
+.ai-delete-conversation-name {
+  font-weight: 500;
+  color: @fl-text;
+
+  &::before {
+    content: '「';
+  }
+
+  &::after {
+    content: '」';
+  }
+}
+
+.ai-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  min-height: 0;
+}
+
+// FIXED: 2026-11-01 切走页面后 Agent 仍在后台执行时，消息末尾的「回复中」占位里的停止按钮
+.ai-resume-stop {
+  margin-left: 8px;
+  padding: 0;
+  font-size: 12px;
+  color: @fl-link;
+  vertical-align: baseline;
+}
+
+.ai-chat-welcome {
+  color: @fl-text-muted;
+  font-size: 13px;
+  line-height: 1.6;
+
+  p {
+    margin-bottom: 8px;
+  }
+
+  ul {
+    padding-left: 20px;
+    margin: 0;
+
+    li {
+      margin-bottom: 4px;
+    }
+  }
+}
+
+.ai-message {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  &-user {
+    flex-direction: row-reverse;
+
+    .ai-message-content {
+      // FIXED: 2026-10-29 多主题：气泡颜色改为主题 token
+      // OLD: background-color: #e3f2fd;  color: #1565c0;
+      background-color: @fl-bubble-user-bg;
+      color: @fl-bubble-user-text;
+      // FIXED: 2026-10-16 用户消息是纯文本（<div>{content}</div>），在此保留换行；
+      // 助手消息是 marked() 渲染的 HTML，不能继承 pre-wrap（见下方 .ai-message-content）
+      white-space: pre-wrap;
+    }
+
+    .ai-message-avatar {
+      // OLD: background-color: #1565c0;
+      background-color: @fl-bubble-user-text;
+    }
+  }
+
+  &-assistant {
+    .ai-message-content {
+      // OLD: background-color: #f5f5f5;  color: #333;
+      background-color: @fl-bubble-assistant-bg;
+      color: @fl-bubble-assistant-text;
+    }
+
+    .ai-message-avatar {
+      background-color: #4caf50;
+    }
+  }
+}
+
+.ai-message-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: @fl-surface;
+  flex-shrink: 0;
+
+  .fa {
+    font-size: 14px;
+  }
+}
+
+.ai-message-content {
+  max-width: 80%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  // FIXED: 2026-10-16 移除 white-space: pre-wrap（仅用户纯文本消息保留，见 .ai-message-user）
+  // OLD: white-space: pre-wrap;
+  // 原因：助手消息由 marked() 渲染为含块级标签的 HTML，标签之间的换行（\n）
+  //       会被 pre-wrap 当作可见换行渲染，再叠加 p/li 的 margin，导致行间距异常大。
+  word-break: break-word;
+}
+
+// FIXED: 2026-10-16 长消息默认折叠（超长输入，如整段编译日志，不再撑爆对话）
+// 说明：用于用户纯文本消息；淡出用 mask 实现，亮/暗主题通用，不依赖气泡底色。
+.ai-collapsible {
+  &.is-collapsed {
+    max-height: 140px; // 约 7 行（13px × 1.5 ≈ 19.5px/行）
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent);
+    mask-image: linear-gradient(to bottom, #000 72%, transparent);
+  }
+}
+
+.ai-collapse-toggle {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #1976d2;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// FIXED: 2026-10-16 用户消息按「空行」分段后的段间距，与助手消息的 8px 对齐
+// 说明：段内仍继承 .ai-message-user 的 white-space: pre-wrap，单个换行照常折行；
+//       仅把「空行」从整行高（≈19.5px）降为 8px 段间距。
+.ai-message-user .ai-message-content .ai-plain-block + .ai-plain-block {
+  margin-top: 8px;
+}
+
+.ai-message-markdown {
+  max-width: 80%;
+
+  // FIXED: 2026-10-23 MathJax 公式在消息气泡内不撑破布局
+  mjx-container {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  mjx-container[display='true'] {
+    display: block;
+    margin: 8px 0;
+  }
+
+  // Markdown 标题样式
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 12px 0 8px 0;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  h1 {
+    font-size: 18px;
+    border-bottom: 1px solid @fl-border;
+    padding-bottom: 4px;
+  }
+
+  h2 {
+    font-size: 16px;
+  }
+
+  h3 {
+    font-size: 14px;
+  }
+
+  h4,
+  h5,
+  h6 {
+    font-size: 13px;
+  }
+
+  // 段落和文本
+  p {
+    margin: 8px 0;
+  }
+
+  // 列表样式
+  ul,
+  ol {
+    margin: 8px 0;
+    padding-left: 20px;
+
+    li {
+      margin: 4px 0;
+    }
+  }
+
+  // 代码块样式
+  pre {
+    background-color: @fl-surface-raised;
+    border: 1px solid @fl-border;
+    border-radius: 4px;
+    padding: 10px;
+    overflow-x: auto;
+    margin: 8px 0;
+    font-size: 12px;
+    line-height: 1.4;
+
+    code {
+      color: @fl-text;
+      background-color: transparent;
+      padding: 0;
+    }
+  }
+
+  // 行内代码
+  code {
+    background-color: @fl-surface-raised;
+    border: 1px solid @fl-border;
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+    font-size: 12px;
+    color: #d63384;
+  }
+
+  // 链接样式
+  // FIXED: 2026-10-29 主题化（柔和主题下不能还是深蓝）
+  // OLD: color: #2c3645;  border-bottom: 1px solid #2c3645;
+  a {
+    color: @fl-primary-action-bg;
+    text-decoration: none;
+    border-bottom: 1px solid @fl-primary-action-bg;
+
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+
+  // 引用块样式
+  blockquote {
+    margin: 8px 0;
+    padding: 8px 12px;
+    border-left: 3px solid @fl-border;
+    background-color: @fl-surface-raised;
+    color: @fl-text-muted;
+    font-size: 12px;
+    line-height: 1.4;
+
+    p {
+      margin: 4px 0;
+      font-size: 12px;
+    }
+
+    strong,
+    b {
+      font-weight: 600;
+    }
+
+    br {
+      line-height: 0.8;
+    }
+  }
+
+  // 水平线
+  hr {
+    border: none;
+    border-top: 1px solid @fl-border;
+    margin: 12px 0;
+  }
+
+  // 表格样式
+  table {
+    border-collapse: collapse;
+    margin: 8px 0;
+    width: 100%;
+    font-size: 12px;
+
+    th,
+    td {
+      border: 1px solid @fl-border;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: @fl-surface-raised;
+      font-weight: 600;
+    }
+  }
+
+  // 强调
+  strong,
+  b {
+    font-weight: 600;
+  }
+
+  em,
+  i {
+    font-style: italic;
+  }
+
+  // 删除线
+  del,
+  s {
+    text-decoration: line-through;
+    color: @fl-text-subtle;
+  }
+}
+
+.ai-loading {
+  color: @fl-text-subtle;
+  font-style: italic;
+}
+
+.fl-ai-chat-textarea {
+  // FIXED: 2026-11 输入框在窄视图（手机、窄侧栏）里把 placeholder 折成了两行，
+  // 末尾那个「件）」单独占了第二行，还挤出一条竖向滚动条，很难看。
+  //
+  // 两层保险：
+  //   1. ::placeholder 锁单行 —— Chrome/Safari 支持，放不下就截断（有省略号）；
+  //   2. 空框时 overflow: hidden —— 万一某浏览器不认 ::placeholder 的 nowrap，
+  //      折出来的第二行也会被裁掉，且不会再冒出滚动条。
+  // 用户一开始输入，:placeholder-shown 就不再命中，输入框恢复正常的滚动行为。
+  &:placeholder-shown {
+    overflow: hidden;
+  }
+
+  &::placeholder {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.ai-chat-input {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background-color: @fl-surface-raised;
+  border-top: 1px solid @fl-border;
+  flex-shrink: 0;
+  margin-top: auto;
+
+  textarea {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid @fl-border;
+    border-radius: 20px;
+    resize: none;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    max-height: 100px;
+
+    &:focus {
+      // OLD: border-color: #2c3645;
+      border-color: @fl-primary-action-bg;
+    }
+
+    &:disabled {
+      background-color: @fl-surface-raised;
+    }
+  }
+
+  .btn-primary {
+    padding: 8px 16px;
+    border-radius: 20px;
+    // OLD: background-color: #2c3645;  border-color: #2c3645;
+    background-color: @fl-primary-action-bg;
+    border-color: @fl-primary-action-bg;
+
+    &:hover:not(:disabled) {
+      // OLD: background-color: #3d4a5c;  border-color: #3d4a5c;
+      background-color: @fl-primary-action-hover;
+      border-color: @fl-primary-action-hover;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+    }
+  }
+}
+
+// ===== FIXED: 2026-11-07 AI 对话的「工具步骤条」=====
+// 运行中：展开列出正在做什么；结束后自动收起成一行很淡的痕迹（只存结论、
+// 步骤不落库，所以这行是用户唯一能回溯“刚才改了什么”的地方）。
+.ai-steps {
+  margin-bottom: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.ai-steps-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 2px 6px;
+  background: transparent;
+  border: none;
+  border-radius: @border-radius-small;
+  text-align: left;
+  cursor: pointer;
+  color: @fl-text-muted;
+
+  &:hover,
+  &:focus {
+    background-color: @fl-surface-raised;
+    color: @fl-text;
+  }
+}
+
+.ai-steps-caret {
+  font-size: 10px;
+  width: 10px;
+  flex: 0 0 auto;
+  color: @fl-text-subtle;
+}
+
+.ai-steps-summary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 很淡的痕迹：结束后整体降到次要文字以下
+.ai-steps-done .ai-steps-toggle {
+  color: @fl-text-subtle;
+  opacity: 0.85;
+  font-size: 11px;
+}
+
+.ai-steps-running .ai-steps-toggle {
+  color: @fl-text-muted;
+}
+
+// 运行中的小圈（纯 CSS，不引图标字体）
+.ai-steps-spinner {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: ai-steps-spin 0.8s linear infinite;
+}
+
+@keyframes ai-steps-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ai-steps-list {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0 0 0 16px;
+}
+
+.ai-step {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 1px 0;
+  color: @fl-text-muted;
+}
+
+.ai-step-icon {
+  flex: 0 0 auto;
+  width: 12px;
+  font-size: 10px;
+  text-align: center;
+}
+
+.ai-step-label {
+  flex: 0 0 auto;
+}
+
+// 文件名/参数：等宽更易读，过长省略
+.ai-step-detail {
+  font-family: @font-family-monospace;
+  font-size: 11px;
+  color: @fl-text-subtle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
+}
+
+.ai-step-time {
+  margin-left: auto;
+  flex: 0 0 auto;
+  font-size: 10px;
+  color: @fl-text-subtle;
+}
+
+.ai-step-error {
+  color: @brand-danger;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-step-error .ai-step-icon,
+.ai-step-error {
+  color: @brand-danger;
+}
+
+// 运行中的消息块：步骤 + 增量文本
+.ai-message-streaming {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+// FIXED: 2026-11-07 原来的消息下方「停止」文字按钮已去掉，
+// 改成发送键位置切换（跑的时候纸飞机 → 停止），样式用 btn-danger。
+// 保留一段轻量样式，让停止键在输入行里不被撑变形。
+.ai-chat-input .btn-danger {
+  flex: 0 0 auto;
+  padding: 4px 12px;
+}
+
+// 用户主动停止：一句淡提示，不落库所以不会出现在历史里
+.ai-message-stopped {
+  font-size: 12px;
+  color: @fl-text-subtle;
+  font-style: italic;
+}
+
+// FIXED: 2026-11-17 消息时间戳（提问/回复下方、功能按钮前面）。
+// 颜色走 --fl-text-muted，深色/浅色/柔和三套主题自动跟随（暗色另有覆盖，见 .editor-dark）。
+.ai-message .ai-msg-time {
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--fl-text-muted, #9ca3af);
+  white-space: nowrap;
+  // 等宽数字：多条消息的时间上下对齐，扫一眼就能比出先后
+  font-variant-numeric: tabular-nums;
+
+  .ai-msg-time-date {
+    margin-right: 4px;
+  }
+
+  // 回复的用时（提问的那条没有这一段）
+  .ai-msg-time-elapsed {
+    margin-left: 6px;
+    opacity: 0.85;
+
+    &::before {
+      content: '· ';
+    }
+  }
+}
+
+// 时间戳 + 功能按钮同一行时（浮层面板的按钮行）：与按钮垂直居中对齐
+.ai-msg-meta > .ai-msg-time {
+  align-self: center;
+}
+
+// 时间戳 + 功能按钮同一行：窄屏放不下就让它折到上一行，而不是把按钮挤出去
+.ai-msg-meta {
+  flex-wrap: wrap;
+  row-gap: 2px;
+}
+
+@media (max-width: @screen-xs-max) {
+  .ai-message .ai-msg-time {
+    font-size: 10px;
+  }
+}
+
+.editor-dark {
+  .editor-and-sidebar-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+  }
+
+  .ai-chat-container {
+    height: 300px;
+    flex-shrink: 0;
+    border-top: 1px solid @editor-dark-toolbar-border-color;
+    background-color: @editor-dark-background-color;
+  }
+
+  .ai-chat-panel {
+    background-color: @editor-dark-background-color;
+    border-top-color: @editor-dark-toolbar-border-color;
+  }
+
+  .ai-chat-header {
+    background-color: darken(@editor-dark-background-color, 3%);
+  }
+
+  .ai-chat-welcome {
+    color: #999;
+  }
+
+  .ai-message-user .ai-message-content {
+    background-color: #1e3a5f;
+    color: #90caf9;
+  }
+
+  .ai-message-assistant .ai-message-content {
+    background-color: lighten(@editor-dark-background-color, 5%);
+    color: #e0e0e0;
+  }
+
+  // FIXED: 2026-10-16 折叠按钮在暗色主题下的配色
+  .ai-collapse-toggle {
+    color: #90caf9;
+  }
+
+  // FIXED: 2026-11-17 时间戳在暗色背景下不能用 --fl-text-muted（#666 太暗）
+  .ai-message .ai-msg-time {
+    color: #8a9aa5;
+  }
+
+  .ai-message-markdown {
+    color: #e0e0e0;
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      color: #e0e0e0;
+      border-color: #444;
+    }
+
+    code {
+      background-color: #2a2a2a;
+      border-color: #444;
+      color: #64b5f6;
+    }
+
+    pre {
+      background-color: #1e1e1e;
+      border-color: #444;
+
+      code {
+        color: #64b5f6;
+      }
+    }
+
+    blockquote {
+      border-color: #444;
+      background-color: #1a1a1a;
+      color: #aaa;
+    }
+
+    table {
+      th,
+      td {
+        border-color: #444;
+      }
+
+      th {
+        background-color: #2a2a2a;
+      }
+    }
+
+    a {
+      color: #64b5f6;
+      border-color: #64b5f6;
+    }
+
+    del,
+    s {
+      color: #777;
+    }
+  }
+
+  .ai-chat-input {
+    background-color: darken(@editor-dark-background-color, 2%);
+    border-top-color: @editor-dark-toolbar-border-color;
+
+    textarea {
+      background-color: @editor-dark-background-color;
+      border-color: @editor-dark-toolbar-border-color;
+      color: #e0e0e0;
+
+      &:focus {
+        border-color: #4d5a6e;
+      }
+    }
+  }
+}
+
+// FIXED: 2026-11-08 「AI 助手」按钮从 codemirror-toolbar 的内联样式抽成共用样式，
+// TeX 工具条和 Markdown 预览提示条共用同一颗按钮（同一个组件 + 同一套主题变量）。
+// 原来那些颜色写在 style={{...}} 里，现在统一走 --fl-* / --toolbar-* token，
+// 三套主题（默认/浅色/柔和）自动跟随。
+// OLD: 内联 style={{ padding:'4px 8px', background: aiChatOpen ? '#e8f5e9' : 'transparent', ... }}
+.fl-ai-toggle-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--fl-border, #ddd);
+  border-radius: 3px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--fl-surface-raised, rgba(0, 0, 0, 0.04));
+  }
+
+  &.active {
+    // 主色 12% 淡染做底、45% 做边、主色画线条（亮色调变绿、柔和色调变陶土）
+    background: var(--fl-ai-toggle-active-bg, #e8f5e9);
+    color: var(--fl-ai-toggle-active-color, #1b5e20);
+    border-color: var(--fl-ai-toggle-active-border, #ddd);
+  }
+}
+
+// FIXED: 2026-11-01 PDF 工具栏里的「AI 助手」入口：全端都不显示。
+// 桌面端已经有 AI 菜单和编辑器工具条两个入口，不必再多一颗；
+// 移动端自 2026-11-10 起改由底部四档 Tab 里的「AI 助手」进入
+// （见 mobile-pdf-only.less），这颗按钮同样不需要了。
+// 用两个类选择器（0,2,0）而不是单个类：CM6 的工具条主题是运行时注入的，
+// 里面 `.ol-cm-toolbar-button { display: inline-flex }` 排在后面且同特异度，
+// 单类规则会被它翻回来 —— 桌面端就会莫名多出一颗按钮。
+.fl-ai-toggle-button.fl-pdf-ai-button {
+  display: none;
+}
+
+// FIXED: 2026-11-17 AI 面板（弹出模式）里点「删除对话」/「清空」，确认框点不动。
+// 根因：AI 浮层在 codemirror-ai-chat.tsx 里是 z-index: 10000（全屏 fixed），
+// 而确认框是 bootstrap 的 .modal = 1050 —— 整块钻到面板下面，连遮罩也被面板盖住，
+// 表现就是「看不见 / 点不了」。
+// react-bootstrap 0.33 的 DOM（已实际渲染确认）：
+//   <div role=dialog> <div class="modal-backdrop"> <div class="… in modal">
+// 即 className 落在最外层 .modal 上，而遮罩是它的**兄弟**，所以两层都要抬，
+// 否则会出现「框浮上来了、遮罩还在面板底下」的半截效果。
+.modal.ai-delete-conversation-modal,
+.modal.ai-clear-conversation-modal {
+  z-index: 20010; // 高于 AI 浮层(10000) 与命令面板(20000)
+}
+
+.modal-backdrop.ai-chat-confirm-backdrop {
+  z-index: 20000; // 双类提高优先级，不依赖 less 的引入顺序
+}
+
+// FIXED: 2026-11-08 「右侧没展开 → 临时停靠到底部」时的一行说明。
+// 不抢主色，弱提示即可（主题变量走 --fl-*，三套主题都跟随）。
+.ai-chat-dock-notice {
+  flex: 0 0 auto;
+  padding: 4px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--fl-text-muted, #6b7280);
+  background: var(--fl-surface-raised, rgba(0, 0, 0, 0.03));
+  border-bottom: 1px solid var(--fl-border, #ddd);
+}
+
+// FIXED: 2026-11-01 移动端 AI 面板头部：宽度本来就紧，"AI 助手" 四个字会折成两行，
+// 把「会话标题 + 新建/历史/删除」挤掉。窄屏只保留图标（图标已足够辨识），
+// 会话标题继续吃掉剩余宽度、超出用省略号。
+@media (max-width: @screen-xs-max) {
+  .ai-chat-header {
+    gap: 8px;
+  }
+
+  .ai-chat-title {
+    min-width: 0;
+    gap: 6px;
+    white-space: nowrap;
+
+    .ai-chat-title-label {
+      display: none;
+    }
+  }
+
+  .ai-chat-title-conversation {
+    min-width: 0;
+    max-width: none;
+    flex: 1 1 auto;
+  }
+
+  // FIXED: 2026-11-15 底部输入区：模式选择（Ask/Agent）原来被内联样式钉成
+  // 120px 宽 + 8px 12px 内边距 + 8px 右间距，手机上约占 1/3 屏，把输入框挤得
+  // 只剩约 120px。移动端把模式选择移到输入框上方独占一行、字号调小，
+  // 输入框在第二行拿到整行宽度。
+  .ai-chat-input {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .ai-chat-input .ai-chat-mode-row {
+    flex: 0 0 100%; // 独占第一行，把输入框挤到第二行
+  }
+
+  .ai-chat-input .ai-chat-mode-select {
+    // 覆盖组件里的内联 minWidth/maxWidth: 120px（内联样式优先级高，必须 !important）
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    padding: 4px 10px !important;
+    margin-right: 0 !important;
+    font-size: 12px !important;
+  }
+}

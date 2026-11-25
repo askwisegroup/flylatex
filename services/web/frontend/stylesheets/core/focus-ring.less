@@ -1,0 +1,44 @@
+//
+// Focus ring（焦点框）
+// --------------------------------------------------
+//
+// FIXED: 2026-11-08 修复「点击界面元素后出现一圈黑边」
+// 现象：<a> / <button> 被鼠标点击后同样会获得焦点，Chrome 会绘制 UA 默认焦点框
+//      （core/mixins.less 的 .tab-focus(): outline: 5px auto -webkit-focus-ring-color），
+//      在亮色 / 柔和色调主题下就是导航栏胶囊按钮外那一圈黑+白双环，外加链接的下划线。
+// 做法：只在键盘（或辅助技术）聚焦 :focus-visible 时绘制主题色焦点环，鼠标点击不再出现黑框；
+//      键盘可达性不受影响（skip-to-content、表单控件等都保留可见焦点）。
+// 注意：本文件必须在各入口（style.less / main-style.less）的最后 @import，
+//      以便覆盖组件（buttons.less、navbar.less 等）里更早的同优先级 outline 声明。
+
+// 1) 鼠标点击不再绘制 UA 默认焦点框（含 checkbox / radio / 普通可聚焦 div）
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+// 2) 链接被点中后残留的默认下划线（core/scaffolding.less 的 a:hover, a:focus）
+a:focus:not(:focus-visible) {
+  text-decoration: none;
+}
+
+// 3) 键盘聚焦时给出主题色焦点环（链接 / 按钮；表单控件沿用自身的边框高亮）
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible,
+[role='button']:focus-visible,
+input[type='file']:focus-visible,
+input[type='radio']:focus-visible,
+input[type='checkbox']:focus-visible {
+  outline: 2px solid @link-color;
+  outline-offset: 2px;
+}
+
+// 4) 导航栏（含下拉菜单）里的链接：胶囊按钮本身有「悬停/聚焦变色」的反馈，
+//    再叠一圈焦点环就是截图里那个黑边，所以这里彻底不要环和下划线。
+.navbar-main {
+  a:focus,
+  a:focus-visible {
+    outline: none;
+    text-decoration: none;
+  }
+}

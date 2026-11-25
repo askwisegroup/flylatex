@@ -1,0 +1,30 @@
+extends ./layout-base
+
+include ./_mixins/formMessages
+
+block entrypointVar
+	- entrypoint = 'marketing'
+
+//- FIXED: 2026-11-05 导航栏「全局主题」快捷切换所需的数据：
+//- 主题清单（含每项要联动的编辑器主题）与用户当前主题，供 navbar-marketing.pug 使用。
+block append meta
+	if overallThemes
+		meta(name="ol-overallThemes" data-type="json" content=overallThemes)
+	meta(name="ol-overallTheme" data-type="string" content=(userSettings && userSettings.overallTheme) || '')
+
+block body
+	if (typeof(suppressNavbar) == "undefined")
+		include layout/navbar-marketing
+
+	block content
+
+	if (typeof(suppressFooter) == "undefined")
+		if showThinFooter
+			include layout/footer-marketing
+		else
+			include layout/fat-footer
+
+	if (typeof(suppressCookieBanner) == 'undefined')
+		include _cookie_banner
+
+	!= moduleIncludes("contactModal-marketing", locals)

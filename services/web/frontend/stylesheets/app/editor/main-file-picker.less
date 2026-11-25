@@ -1,0 +1,94 @@
+// FIXED: 2026-11-10 主文件选择（预览区「主文件不存在」卡片 + 选择弹窗）
+//   卡片和弹窗都是新加的，样式单独放在这里；@import 加在 app/editor.less，
+//   这样 style.less（线上实际加载的那套）和 main-style.less 都能拿到。
+
+.main-file-issue {
+  .main-file-issue-text {
+    margin-bottom: 8px;
+  }
+
+  .main-file-issue-action {
+    margin-bottom: 2px;
+  }
+}
+
+.select-main-file-modal {
+  .select-main-file-hint {
+    margin: 0 0 10px;
+    color: @text-muted;
+    font-size: 13px;
+
+    code {
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: @gray-lightest;
+      font-family: @font-family-monospace;
+      font-size: 12px;
+      // hint 本身是 @text-muted，命令再跟着变灰就看不清了
+      color: @text-color;
+    }
+  }
+
+  .select-main-file-error {
+    margin: 0 0 10px;
+    color: @brand-danger;
+    font-size: 13px;
+  }
+
+  .select-main-file-list {
+    // 文档多的项目（几十个 .tex）在手机上要能滚，不能让弹窗顶出屏幕
+    max-height: 46vh;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+    border: 1px solid @gray-lighter;
+    border-radius: 4px;
+
+    > li + li {
+      border-top: 1px solid @gray-lighter;
+    }
+  }
+
+  .select-main-file-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 10px 12px;
+    font-weight: normal;
+    cursor: pointer;
+
+    &:hover {
+      background: @gray-lightest;
+    }
+
+    &.is-selected {
+      background: @ol-blue-gray-0;
+    }
+
+    input[type='radio'] {
+      flex: none;
+      margin: 0;
+    }
+  }
+
+  .select-main-file-path {
+    flex: 1;
+    min-width: 0;
+    // 长路径（深目录 + 中文文件名）必须折行，否则会把复选框挤出去
+    font-family: @font-family-monospace;
+    font-size: 13px;
+    word-break: break-all;
+  }
+
+  .select-main-file-badge {
+    flex: none;
+    padding: 1px 7px;
+    border-radius: 10px;
+    background: @link-color;
+    color: #fff;
+    font-size: 11px;
+    line-height: 16px;
+  }
+}

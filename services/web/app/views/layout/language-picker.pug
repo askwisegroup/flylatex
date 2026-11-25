@@ -1,0 +1,43 @@
+//- FIXED: 2026-11-10 语言选项改成"实际加载得到的语言"，并且真的能切。
+//- OLD: 只遍历 settings.i18n.subdomainLang；本站只有一个 www 子域，
+//-      footer.pug 里 Object.keys(subdomainLang).length > 1 恒为 false，
+//-      整块选择器被隐藏 —— 用户在站内切不到日本語 / Español / Português。
+//- 新: 多子域部署（overleaf.com 那种）仍然用子域链接；单子域部署改用
+//-     i18nLanguages（Translations.js 里由 availableLanguageCodes 生成），
+//-     点击后写 cookie + localStorage 再刷新（脚本在 layout-base.pug）。
+- var subdomainLangs = Object.entries(settings.i18n.subdomainLang || {}).filter(function (entry) { return !entry[1].hide })
+- var useSubdomainLinks = subdomainLangs.length > 1
+- var labelMap = i18nLanguageLabels || settings.translatedLanguages || {}
+-
+	var pickerLanguages = useSubdomainLinks
+		? subdomainLangs.map(function (entry) {
+			return { code: entry[1].lngCode, label: labelMap[entry[1].lngCode] || entry[1].lngCode, url: entry[1].url }
+		})
+		: (i18nLanguages || [])
+- var currentLabel = labelMap[currentLngCode] || currentLngCode
+
+li.dropdown.dropup.subdued(dropdown).language-picker
+	a.dropdown-toggle#language-picker-toggle(
+		href="#",
+		dropdown-toggle,
+		data-ol-lang-selector-tooltip,
+		data-toggle="dropdown",
+		role="button"
+		aria-haspopup="true"
+		aria-expanded="false"
+		aria-label="Select " + translate('language'),
+		tooltip=translate('language')
+		title=translate('language')
+	)
+		i.fa.fa-fw.fa-language
+		|
+		| #{currentLabel}
+
+	ul.dropdown-menu(role="menu" aria-labelledby="language-picker-toggle")
+		li.dropdown-header #{translate("language")}
+		each option in pickerLanguages
+			li.lngOption(class=(option.code === currentLngCode ? 'active' : undefined))
+				if useSubdomainLinks
+					a.menu-indent(href=option.url+currentUrlWithQueryParams role="menuitem") #{option.label}
+				else
+					a.menu-indent(href="#", role="menuitem", data-ol-set-lang=option.code, hreflang=option.code) #{option.label}

@@ -1,0 +1,186 @@
+// Styleguide colors
+@ol-green: #138a07;
+@ol-dark-green: #004a0e;
+@ol-blue: #3e70bb;
+@ol-dark-blue: #2857a1;
+@ol-red: #c9453e;
+@ol-dark-red: #a6312b;
+
+@ol-type-color: @ol-blue-gray-3;
+
+// 外壳（chrome）：亮色主题下从深蓝底反转为白底 + 深字
+// FIXED: 2026-10-29 之前菜单栏颜色在 import 之后被写死，切亮色主题仍是深蓝横条
+@fl-chrome-bg: #fff;
+@fl-chrome-border: #e4e8ee;
+@fl-chrome-text: #1b222c;
+@fl-chrome-text-muted: #5d6879;
+@fl-chrome-hover: #f4f5f8;
+@fl-primary-action-bg: #3e70bb;
+@fl-primary-action-hover: #2857a1;
+
+// Sidebar
+@sidebar-bg: #fff;
+// FIXED: 2026-10-29 @sidebar-color/@sidebar-link-color 上游是 #FFF（给深色侧栏用的），
+// 浅色侧栏上线后整列菜单变成白底白字，完全看不见
+@sidebar-color: @ol-blue-gray-3;
+@sidebar-link-color: @ol-blue-gray-3;
+@folders-title-color: @ol-blue-gray-4;
+@folders-tag-menu-color: @ol-blue-gray-3;
+@folders-tag-border-color: @ol-blue-gray-1;
+@tag-color: @ol-blue-gray-4;
+// 浅色主题顶栏不要品牌紫蓝渐变，用纯色
+@fl-navbar-gradient: none;
+// FIXED: 2026-11-01 「内容已复制到剪贴板」原来写死 @ol-blue(#3e70bb)，
+// 亮色调是绿主题，这个蓝块显得完全不属于这里
+@fl-alert-success-bg: @ol-green;
+// FIXED: 2026-11-02 AI 开关按钮激活态：浅底（白工具栏）上用主色绿画线条，不需要提亮
+@fl-ai-toggle-active-bg: fade(@ol-green, 12%);
+@fl-ai-toggle-active-border: fade(@ol-green, 45%);
+@fl-ai-toggle-active-color: @ol-green;
+@sidebar-active-bg: @ol-green;
+@sidebar-active-color: #fff;
+@sidebar-hover-bg: @ol-blue-gray-1;
+@sidebar-active-font-weight: normal;
+@sidebar-hover-text-decoration: none;
+
+@v2-dash-pane-bg: @ol-blue-gray-1;
+@v2-dash-pane-link-color: @ol-blue;
+@v2-dash-pane-toggle-color: @ol-blue-gray-3;
+@v2-dash-pane-btn-bg: @ol-blue-gray-5;
+@v2-dash-pane-btn-hover-bg: @ol-blue-gray-6;
+@v2-dash-pane-color: @ol-blue-gray-3;
+
+@progress-bar-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+@progress-bg: @ol-blue-gray-0;
+
+@input-border: @ol-blue-gray-1;
+
+// Editor file-tree
+// FIXED: 2026-11-08 文件树文字/图标在亮色主题下几乎看不清。
+// 真因：本 fork 把 @ol-blue-gray-2 改成了 #FFF（上游是 #9da7b7），
+// 而图标、文件夹图标、展开箭头、重命名输入框颜色全都取自它 → 白图标 + 白字，
+// 在 @file-tree-bg(#fff) 上等于消失。这里不再复用 @ol-blue-gray-2，直接给实测色值：
+//   名字 #3f4a5c / 图标 #6f7a8a / 文件夹 #5c6675（黑白底上对比度 9.3:1 / 4.6:1 / 6.2:1）
+// OLD:
+//   @file-tree-item-color: @ol-blue-gray-3;
+//   @file-tree-item-input-color: @ol-blue-gray-2;
+//   @file-tree-item-toggle-color: @ol-blue-gray-2;
+//   @file-tree-item-icon-color: @ol-blue-gray-2;
+//   @file-tree-item-folder-color: @ol-blue-gray-2;
+//   @file-tree-droppable-bg-color: @ol-blue-gray-2;
+@file-tree-bg: #fff;
+@file-tree-line-height: 2.05;
+@file-tree-item-color: #3f4a5c;
+@file-tree-item-focus-color: @file-tree-item-color;
+@file-tree-item-selected-color: #fff;
+@file-tree-item-input-color: #303a4a;
+@file-tree-item-toggle-color: #6f7a8a;
+@file-tree-item-icon-color: #6f7a8a;
+@file-tree-item-folder-color: #5c6675;
+@file-tree-item-hover-bg: @ol-blue-gray-1;
+@file-tree-item-selected-bg: @ol-green;
+@file-tree-multiselect-bg: @ol-blue;
+@file-tree-multiselect-hover-bg: @ol-dark-blue;
+@file-tree-droppable-bg-color: #9aa4b3;
+// FIXED: 2026-11-08 大纲面板的展开/折叠箭头原来也是 @ol-blue-gray-2(#FFF)，
+// 在亮色/柔和主题下同样等于隐形，和文件树图标是同一个根因，一并修掉。
+@outline-expand-collapse-color: #6f7a8a;
+
+@content-alt-bg-color: @ol-blue-gray-0;
+
+// File outline
+@outline-line-guide-color: @ol-blue-gray-1;
+@outline-header-hover-bg: @file-tree-item-hover-bg;
+@outline-highlight-bg: mix(@file-tree-bg, @ol-blue-gray-1);
+
+@vertical-resizable-resizer-bg: @ol-blue-gray-1;
+@vertical-resizable-resizer-hover-bg: @file-tree-item-hover-bg;
+
+// Editor resizers
+@editor-resizer-bg-color: @ol-blue-gray-1;
+@editor-resizer-bg-color-dragging: @ol-blue-gray-1;
+// FIXED: 2026-10-29 原来是 @ol-blue-gray-2(#FFF)，浅底 + 白箭头等于看不见
+@editor-toggler-bg-color: @ol-blue-gray-3;
+@editor-toggler-hover-bg-color: @ol-green;
+@synctex-controls-z-index: 6;
+@synctex-controls-padding: 0;
+@editor-border-color: @ol-blue-gray-1;
+
+@toolbar-border-color: @ol-blue-gray-1;
+@toolbar-alt-bg-color: #fff;
+@editor-toolbar-bg: @toolbar-alt-bg-color;
+
+@toolbar-header-bg-color: #fff;
+@toolbar-header-btn-border-color: @ol-blue-gray-1;
+@toolbar-btn-color: @ol-blue-gray-3;
+@toolbar-btn-hover-color: @ol-blue-gray-3;
+@toolbar-btn-hover-bg-color: @ol-blue-gray-0;
+@toolbar-icon-btn-color: @ol-blue-gray-3;
+@toolbar-icon-btn-hover-color: @ol-blue-gray-3;
+@editor-header-logo-background: url(../../../public/img/ol-brand/overleaf-o.svg)
+  center / contain no-repeat;
+@project-name-color: @ol-blue-gray-3;
+@project-rename-link-color: @ol-blue-gray-3;
+@project-rename-link-color-hover: @ol-blue-gray-4;
+@pdf-bg: @ol-blue-gray-0;
+@logs-pane-bg: @ol-blue-gray-1;
+
+// Navbar
+@navbar-default-bg: #fff;
+@navbar-default-border: @ol-blue-gray-1;
+@navbar-default-link-bg: @ol-green;
+@navbar-default-link-color: #fff;
+@navbar-default-link-border-color: transparent;
+@navbar-default-link-hover-bg: @ol-green;
+@navbar-default-link-active-bg: @ol-green;
+@navbar-default-link-hover-color: @ol-green;
+// FIXED: 2026-11-10 移动端汉堡按钮跟随主题主色（浅色底上原来的 #fff 看不见）
+@navbar-default-toggle-color: @ol-green;
+
+// FIXED: 2026-10-29 左上角 FlyLaTeX 字标：#e4e8ee 是给紫蓝顶栏用的，白底顶栏下等于隐身
+@navbar-title-color: @ol-blue-gray-4;
+@navbar-title-color-hover: @ol-blue-gray-5;
+@navbar-default-color: @ol-blue-gray-3;
+@navbar-brand-image-url: url(../../../public/img/ol-brand/overleaf.svg);
+
+@navbar-subdued-color: @ol-blue-gray-3;
+@navbar-subdued-hover-bg: @ol-blue-gray-1;
+@navbar-subdued-hover-color: @ol-blue-gray-3;
+
+// v2 History
+@history-toolbar-color: @ol-blue-gray-3;
+@history-base-bg: @ol-blue-gray-0;
+@history-file-badge-bg: rgba(0, 0, 0, 0.25);
+@history-file-badge-color: #fff;
+
+// Formatting buttons
+@formatting-btn-color: @toolbar-icon-btn-color;
+@formatting-btn-bg: transparent;
+@formatting-btn-border: @ol-blue-gray-1;
+@formatting-menu-bg: #fff;
+
+// Chat
+@chat-bg: #fff;
+@chat-instructions-color: @ol-blue-gray-3;
+@chat-message-color: #fff;
+@chat-message-name-color: @ol-blue-gray-3;
+@chat-message-date-color: @ol-blue-gray-3;
+@chat-new-message-bg: @ol-blue-gray-0;
+@chat-new-message-textarea-bg: #fff;
+@chat-new-message-textarea-color: @ol-blue-gray-6;
+@chat-new-message-border-color: @ol-blue-gray-1;
+
+// Symbol Palette
+@symbol-palette-bg: #fff;
+@symbol-palette-color: @ol-blue-gray-3;
+@symbol-palette-header-background: @ol-blue-gray-1;
+@symbol-palette-item-bg: @ol-blue-gray-1;
+@symbol-palette-item-color: @ol-blue-gray-3;
+@symbol-palette-selected-tab-bg: #fff;
+@symbol-palette-selected-tab-color: @ol-blue;
+@symbol-palette-text-shadow-color: @ol-blue-gray-1;
+
+// React History
+@history-react-header-bg: #fff;
+@history-react-header-color: @ol-blue-gray-3;
+@history-react-separator-color: @neutral-20;

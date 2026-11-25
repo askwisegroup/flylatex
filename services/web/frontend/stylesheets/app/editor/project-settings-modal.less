@@ -1,0 +1,79 @@
+// FIXED: 2026-11-11 移动端「项目设置」弹窗（编译器 + 主目录）。
+//
+// 弹窗自身挂的是 `.settings-modal`（dialogClassName 里两个类一起给），
+// 所以模态框的底色 / 边框 / 文字 / 设置行排版直接复用设置弹窗那一套
+// @fl-* 主题变量，这里只覆盖「手机上应该长什么样」：
+//   - 收到 420px，高度自适应，不再占满 860 × (100vh - 160px)；
+//   - .modal-body 从 flex 导航布局改回普通块，设置行改成 label 在上、
+//     select 整行在下（360px 宽下 50% / 50% 会把路径挤成一条缝）。
+// 本文件必须在 left-menu.less 之后引入，覆盖才生效（见 app/editor.less）。
+.fl-project-settings-modal {
+  width: 420px;
+  max-width: calc(100vw - 28px);
+  height: auto;
+  margin: 12vh auto;
+
+  .modal-header {
+    padding: 12px 16px;
+  }
+
+  .modal-title {
+    font-size: 16px;
+  }
+
+  .modal-body {
+    display: block;
+    padding: 14px 16px 4px;
+    overflow-y: auto;
+  }
+
+  .modal-footer {
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .left-menu-setting {
+    display: block;
+    padding: 0 0 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid @fl-border;
+
+    &:last-child {
+      padding-bottom: 0;
+      margin-bottom: 0;
+      border-bottom: 0;
+    }
+
+    label {
+      display: block;
+      flex: none;
+      width: auto;
+      margin: 0 0 6px;
+      padding-right: 0;
+      font-size: 13px;
+      line-height: 1.4;
+      color: @fl-text-muted;
+      white-space: normal;
+    }
+
+    select.form-control {
+      width: 100%;
+      height: 36px;
+      margin: 0;
+      padding: 4px 8px;
+      font-size: 14px;
+      color: @fl-text;
+      background-color: @fl-surface;
+      border-color: @fl-border;
+
+      &:focus {
+        border-color: @ol-green;
+      }
+    }
+  }
+
+  // 手机上「完成」做成整行按钮，拇指好点
+  .modal-footer .btn {
+    display: block;
+    width: 100%;
+  }
+}

@@ -1,0 +1,323 @@
+- const activeLangCode = currentLngCode || (settings && settings.i18n && settings.i18n.defaultLng) || 'zh-CN'
+//- FIXED: 2026-11-19 站点域/白板地址来自配置（internal-values → Settings），模板不再写死
+- const languageCookieDomain = (settings && settings.languageCookieDomain) || ''
+- const siteWhiteboardUrl = (settings && settings.whiteboardUrl) || ''
+doctype html
+html(
+	lang=activeLangCode
+	class=(fixedSizeDocument ? 'fixed-size-document' : undefined)
+)
+	- metadata = metadata || {}
+
+	block entrypointVar
+
+	block vars
+
+	head
+		include ./_metadata.pug
+
+		//- Stylesheet
+		link(rel='stylesheet', href=buildCssPath(getCssThemeModifier(userSettings, brandVariation)), id="main-stylesheet")
+		block css
+			each file in entrypointStyles(entrypoint)
+				link(rel='stylesheet', href=file)
+
+		block _headLinks
+
+		if settings.i18n.subdomainLang
+			each subdomainDetails in settings.i18n.subdomainLang
+				if !subdomainDetails.hide
+					link(rel="alternate", href=subdomainDetails.url+currentUrl, hreflang=subdomainDetails.lngCode)
+
+		//- Scripts
+		include _google_analytics
+
+		block meta
+			meta(name="ol-csrfToken" content=csrfToken)
+			//- Configure dynamically loaded assets (via webpack) to be downloaded from CDN
+			//- See: https://webpack.js.org/guides/public-path/#on-the-fly
+			
+			meta(name="ol-baseAssetPath" content=buildBaseAssetPath())
+
+			meta(name="ol-usersEmail" content=getUserEmail())
+
+			//- siteUrl: settings.siteUrl,
+			meta(name="ol-sharelatex" data-type="json" content={
+				siteUrl: settings.siteUrl,
+				wsUrl,
+			})
+			meta(name="ol-ab" data-type="json" content={})
+			meta(name="ol-user_id" content=getLoggedInUserId())
+			//- Internationalisation settings
+			meta(name="ol-i18n" data-type="json" content={
+				currentLangCode: activeLangCode
+			})
+			//- Expose some settings globally to the frontend
+			meta(name="ol-ExposedSettings" data-type="json" content=ExposedSettings)
+			meta(name="ol-splitTestVariants" data-type="json" content=splitTestVariants || {})
+			meta(name="ol-splitTestInfo" data-type="json" content=splitTestInfo || {})
+
+			if (typeof(settings.algolia) != "undefined")
+				meta(name="ol-algolia" data-type="json" content={
+					appId: settings.algolia.app_id,
+					apiKey: settings.algolia.read_only_api_key,
+					indexes: settings.algolia.indexes
+				})
+
+			if (typeof(settings.templates) != "undefined")
+				meta(name="ol-sharelatex.templates" data-type="json" content={
+					user_id : settings.templates.user_id,
+					cdnDomain : settings.templates.cdnDomain,
+					indexName : settings.templates.indexName
+				})
+
+			meta(name="ol-isManagedAccount" data-type="boolean" content=isManagedAccount)
+			each restriction in userRestrictions || []
+				meta(name='ol-cannot-' + restriction data-type="boolean" content=true)
+
+		block head-scripts
+			script(type="text/javascript").
+				// FIXED: 2026-11-20 语言偏好的**唯一一份**常量定义。
+				// 之前这里写的 cookie 名和 app 实际读取的不是同一个：
+				//   · 服务端 Translations.js（lookupCookie、子域默认语言）和前端
+				//     frontend/js/i18n.js 读的都是 flylatex-lang
+				//   · 这里却写成了另一个名字 → 切语言时服务端永远看不到，
+				//     刷新回来还是原语言（页脚选择器、设置页「默认语言」都失效）
+				var FLYLATEX_LANG_COOKIE = 'flylatex-lang'
+				var FLYLATEX_LANG_STORAGE_KEYS = ['flylatex-lang', 'flylatexLang', 'NEXT_LOCALE', 'i18nextLng', 'locale']
+				var FLYLATEX_LANG_COOKIE_DOMAIN = !{JSON.stringify(languageCookieDomain)}
+				// FIXED: 2026-11-20 写语言 cookie 前，先把「同名不同作用域」的旧 cookie 作废。
+				// 同一个名字、不同 Domain 在浏览器里是**两条** cookie；请求头按创建时间排序，
+				// 服务端 cookie.parse 只读第一条 —— 官网首页（flylatex-portal-new）写的是
+				// host-only，本站写的是 Domain=.example.com，于是首页那条旧值永远赢：
+				// 「切完刷新又变回去」。删除不存在的 cookie 无害，所以两种作用域都删。
+				function flylatexLangCookieBase() {
+					var parts = ['Path=/', 'SameSite=Lax']
+					if (location.protocol === 'https:') {
+						parts.push('Secure')
+					}
+					return parts.join('; ')
+				}
+				function flylatexLangCookieDomainAttr() {
+					if (FLYLATEX_LANG_COOKIE_DOMAIN && location.hostname && location.hostname.endsWith(FLYLATEX_LANG_COOKIE_DOMAIN)) {
+						return '; Domain=.' + FLYLATEX_LANG_COOKIE_DOMAIN
+					}
+					return ''
+				}
+				function flylatexWriteLangCookie(code) {
+					var base = flylatexLangCookieBase()
+					var domain = flylatexLangCookieDomainAttr()
+					document.cookie = FLYLATEX_LANG_COOKIE + '=; ' + base + '; Max-Age=0'
+					if (domain) {
+						document.cookie = FLYLATEX_LANG_COOKIE + '=; ' + base + domain + '; Max-Age=0'
+					}
+					document.cookie = FLYLATEX_LANG_COOKIE + '=' + encodeURIComponent(code) + '; ' + base + domain + '; Max-Age=' + (60 * 60 * 24 * 365)
+				}
+				;(function syncFlylatexLanguagePreference() {
+					try {
+						if (typeof window === 'undefined') {
+							return
+						}
+						var storageKeys = FLYLATEX_LANG_STORAGE_KEYS
+						var storageLang = null
+						for (var i = 0; i < storageKeys.length; i++) {
+							var key = storageKeys[i]
+							try {
+								if (window.localStorage) {
+									var candidate = localStorage.getItem(key)
+									if (candidate) {
+										storageLang = candidate
+										break
+									}
+								}
+							} catch (storageError) {
+								storageLang = null
+								break
+							}
+						}
+						var cookieMatch = document.cookie.match(new RegExp('(?:^|; )' + FLYLATEX_LANG_COOKIE + '=([^;]+)'))
+						var cookieLang = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null
+						if (!storageLang) {
+							storageLang = cookieLang
+						}
+						if (!storageLang) {
+							return
+						}
+						if (window.localStorage) {
+							for (var j = 0; j < storageKeys.length; j++) {
+								var storageKey = storageKeys[j]
+								try {
+									//- var existingValue = localStorage.getItem(storageKey)
+									//- if (existingValue !== storageLang) {
+										//- localStorage.setItem(storageKey, storageLang)
+									//- }
+								} catch (setError) {
+									break
+								}
+							}
+						}
+						var syncFlagKey = 'flylatexLangSyncReloaded'
+						if (cookieLang === storageLang) {
+							if (window.sessionStorage && sessionStorage.getItem(syncFlagKey) === 'true') {
+								sessionStorage.removeItem(syncFlagKey)
+							}
+							return
+						}
+						if (window.sessionStorage && sessionStorage.getItem(syncFlagKey) === 'true') {
+							return
+						}
+						flylatexWriteLangCookie(storageLang)
+						if (window.sessionStorage) {
+							sessionStorage.setItem(syncFlagKey, 'true')
+						}
+						window.location.reload()
+					} catch (error) {
+						if (window.console && console.warn) {
+							console.warn('Failed to synchronise language preference', error)
+						}
+					}
+				})()
+				// FIXED: 2026-11-12 原来这里是 pug 注释 //- 但在 script. 文本块内 pug 不解析，
+				// 会原样输出；两段 IIFE 之间缺分号，被解析成 })()(function...，报
+				// "(intermediate value)(...) is not a function"，整段中断、语言选择器失效。
+				// 改法：真正的 JS 注释（每行都要有 //），并给第二段加前导分号。
+				// OLD: 四个 //- 注释行 + 无分号的 (function bindFlylatexLanguageSelector() {
+				;(function bindFlylatexLanguageSelector() {
+						try {
+							if (typeof document === 'undefined') {
+								return
+							}
+							var setLanguage = function (code) {
+								if (!code) {
+									return
+								}
+								flylatexWriteLangCookie(code)
+								try {
+									if (window.localStorage) {
+										for (var si = 0; si < FLYLATEX_LANG_STORAGE_KEYS.length; si++) {
+											localStorage.setItem(FLYLATEX_LANG_STORAGE_KEYS[si], code)
+										}
+									}
+								} catch (storageError) {}
+								window.location.reload()
+							}
+							// FIXED: 2026-11-20 设置页的「默认语言」直接调它，避免再抄一份
+							// cookie 名 / storage key 列表（抄错就是「切了没反应」）。
+							window.flylatexSetLanguage = setLanguage
+							document.addEventListener('click', function (event) {
+								var el = event.target
+								while (el && el !== document) {
+									if (el.getAttribute && el.getAttribute('data-ol-set-lang')) {
+										event.preventDefault()
+										setLanguage(el.getAttribute('data-ol-set-lang'))
+										return
+									}
+									el = el.parentNode
+								}
+							})
+						} catch (error) {
+							if (window.console && console.warn) {
+								console.warn('Failed to bind language selector', error)
+							}
+						}
+					})()
+
+	body(ng-csp=(cspEnabled ? "no-unsafe-eval" : false) class=(showThinFooter ? 'thin-footer' : undefined))
+		if(settings.recaptcha && settings.recaptcha.siteKeyV3)
+			script(type="text/javascript", nonce=scriptNonce, src="https://www.recaptcha.net/recaptcha/api.js?render="+settings.recaptcha.siteKeyV3)
+
+		if (typeof(suppressSkipToContent) == "undefined")
+			a(class="skip-to-content" href="#main-content") #{translate('skip_to_content')}
+
+		block body
+
+	block foot-scripts
+		each file in entrypointScripts(entrypoint)
+			script(type="text/javascript", nonce=scriptNonce, src=file)
+	
+	script(type="text/javascript", nonce=scriptNonce).
+		//- Look for bundle
+		var cdnBlocked = typeof Frontend === 'undefined'
+		//- Prevent loops
+		var noCdnAlreadyInUrl = window.location.href.indexOf("nocdn=true") != -1
+		if (cdnBlocked && !noCdnAlreadyInUrl && navigator.userAgent.indexOf("Googlebot") == -1) {
+			//- Set query param, server will not set CDN url
+			window.location.search += "&nocdn=true";
+		}
+
+		function openWhiteBoard() {
+			// FIXED: 2026-11-08 显式指定 '_blank'，确保新页签打开（与导航栏胶囊按钮一致）
+			window.open(!{JSON.stringify(siteWhiteboardUrl)}, '_blank', 'noopener');
+		}
+
+		document.addEventListener('DOMContentLoaded', function() {
+			const getSidLink = document.getElementById('getSidLink');
+			const openWhiteboardLink = document.getElementById('openWhiteboard');
+
+			if (getSidLink) {
+				getSidLink.addEventListener('click', function() {
+					fetch('/getSid', {
+						method: 'GET'
+					})
+					.then(response => response.json())
+					.then(data => {
+						showDialog('sharelatex.sid=' + data.sid);
+					})
+					.catch(error => {
+						console.error('Error:', error);
+						showDialog('Error fetching SID');
+					});
+				});
+			}
+
+			if (openWhiteboardLink) {
+				openWhiteboardLink.addEventListener('click', function(){
+					openWhiteBoard();
+				});
+			}
+
+			function showDialog(content) {
+				const dialog = document.createElement('div');
+				dialog.style.cssText = `
+					position: fixed;
+					top: 0;
+					left: 0;
+					width: 100%;
+					height: 100%;
+					background-color: rgba(0, 0, 0, 0.5);
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					z-index: 1000;
+				`;
+
+				const dialogContent = document.createElement('div');
+				dialogContent.style.cssText = `
+					background-color: white;
+					padding: 20px;
+					border-radius: 5px;
+					text-align: center;
+				`;
+
+				const contentP = document.createElement('p');
+				contentP.textContent = content;
+				dialogContent.appendChild(contentP);
+
+				const closeButton = document.createElement('button');
+				const flylatexLang = localStorage.getItem('flylatexLang');
+				closeButton.textContent = flylatexLang === 'zh-CN' ? '关闭' : 'Close';
+				closeButton.style.marginTop = '10px';
+				closeButton.style.backgroundColor = '#3c64cf';
+				closeButton.style.padding = '2px 30px';
+				closeButton.style.border = 'none';
+				closeButton.style.color = 'white';
+				closeButton.style.borderRadius = '20px';
+				closeButton.addEventListener('click', function() {
+					document.body.removeChild(dialog);
+				});
+				dialogContent.appendChild(closeButton);
+
+				dialog.appendChild(dialogContent);
+				document.body.appendChild(dialog);
+			}
+		});

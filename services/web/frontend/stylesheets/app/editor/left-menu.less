@@ -1,0 +1,804 @@
+#left-menu {
+  position: absolute;
+  width: @left-menu-width;
+  padding: (@line-height-computed / 2);
+  top: 0;
+  bottom: 0;
+  background-color: #f4f4f4;
+  z-index: 100;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-transition: left ease-in-out @left-menu-animation-duration;
+  transition: left ease-in-out @left-menu-animation-duration;
+  font-size: 14px;
+  left: -@left-menu-width;
+
+  &.shown {
+    left: 0;
+  }
+
+  h4 {
+    font-family: @font-family-sans-serif;
+    font-weight: 400;
+    font-size: 1rem;
+    margin: (@line-height-computed / 2) 0;
+    padding-bottom: (@line-height-computed / 4);
+    color: @neutral-70;
+    border-bottom: 1px solid @gray-lighter;
+  }
+
+  > h4:first-child {
+    margin-top: 0;
+  }
+
+  ul.nav {
+    .left-menu-button {
+      cursor: pointer;
+      padding: (@line-height-computed / 4);
+      font-weight: 700;
+      color: @link-color;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      background-color: inherit;
+      border: none;
+
+      i {
+        margin-right: @margin-sm;
+        color: @gray;
+      }
+
+      &:hover,
+      &:active {
+        background-color: @link-color;
+        color: white;
+
+        i {
+          color: white;
+        }
+      }
+    }
+
+    a {
+      cursor: pointer;
+      &:hover,
+      &:active,
+      &:focus {
+        background-color: @link-color;
+        color: white;
+        i {
+          color: white;
+        }
+      }
+      i {
+        color: @gray;
+      }
+      padding: (@line-height-computed / 4);
+      font-weight: 700;
+    }
+    .link-disabled {
+      color: @gray-light;
+    }
+  }
+
+  > ul.nav:last-child {
+    margin-bottom: @line-height-computed / 2;
+  }
+
+  ul.nav-downloads {
+    li {
+      display: inline-block;
+      text-align: center;
+      width: 100px;
+      a {
+        color: @gray-dark;
+      }
+      i {
+        margin: (@line-height-computed / 4) 0;
+      }
+    }
+  }
+
+  form.settings {
+    label {
+      font-weight: normal;
+      color: @gray-dark;
+      flex: 1 0 50%;
+      margin-bottom: 0;
+      margin-top: 9px;
+      padding-right: 5px;
+      white-space: nowrap;
+    }
+    button,
+    select {
+      width: 50%;
+      margin: 9px 0;
+    }
+    .form-controls {
+      clear: both;
+      padding: 0 9px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: flex-end;
+      border-bottom: solid 1px rgba(0, 0, 0, 0.07);
+      &:first-child {
+        margin-top: -9px;
+      }
+      &:last-child {
+        border-bottom: 0;
+      }
+      &:hover {
+        background-color: @link-color;
+        // select.form-control {
+        // 	color: white;
+        // }
+        label,
+        i.fa {
+          color: white;
+        }
+      }
+      &:after {
+        content: '';
+        display: table;
+        clear: both;
+      }
+    }
+  }
+
+  .left-menu-setting {
+    padding: 0 9px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: flex-end;
+    border-bottom: solid 1px rgba(0, 0, 0, 0.07);
+    margin-bottom: 0;
+
+    &:first-child {
+      margin-top: -9px;
+    }
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    &:hover {
+      background-color: @link-color;
+
+      label {
+        color: @white;
+      }
+    }
+
+    select.form-control {
+      height: 23px;
+      padding: 1px @padding-xs;
+      font-size: inherit;
+
+      &:hover {
+        background-color: @ol-blue-gray-1;
+      }
+    }
+  }
+}
+
+#left-menu-mask {
+  .full-size;
+  opacity: 0.4;
+  background-color: #999;
+  z-index: 99;
+  transition: opacity 0.5s;
+}
+
+// Make the Bootstrap Modal behavior as a left sidebar
+#left-menu-modal {
+  opacity: 1;
+  overflow-y: hidden;
+  padding-left: 0 !important; // bootstrap modal may randomly give padding-left when zooming in / out in chrome
+  .modal-dialog {
+    height: 100%;
+    margin: 0;
+    width: @left-menu-width;
+  }
+
+  .modal-content {
+    position: initial;
+  }
+  &.modal.fade .modal-dialog {
+    left: -@left-menu-width;
+    transition: left ease-in-out @left-menu-animation-duration;
+    -webkit-transition: left ease-in-out @left-menu-animation-duration;
+    transform: translate(0, 0);
+  }
+  &.modal.in .modal-dialog {
+    left: 0;
+    transform: translate(0, 0);
+  }
+}
+// Don't disable backdrop that allows closing the Modal when clicking outside of it,
+// But match its background color with the original mask background color.
+.left-menu-modal-backdrop {
+  background-color: transparent;
+}
+
+// FIXED: 2026-11-01 设置的第二种显示方式：居中弹窗 + 分类展示。
+// 只新增样式，不动上面 #left-menu 的任何规则（默认模式外观不变）。
+// 注意这个类是挂在 .modal-dialog 上的（dialogClassName），不是最外层 .modal。
+.settings-modal {
+  display: flex;
+  flex-direction: column;
+  width: 860px;
+  max-width: calc(100vw - 40px);
+  height: calc(100vh - 160px);
+  margin: 80px auto;
+
+  .modal-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    background-color: @fl-surface;
+    color: @fl-text;
+    border-radius: @border-radius-base;
+  }
+
+  .modal-header {
+    flex: 0 0 auto;
+    padding: 14px 22px;
+    border-bottom: 1px solid @fl-border;
+  }
+
+  .modal-footer {
+    flex: 0 0 auto;
+    padding: 12px 22px;
+    border-top: 1px solid @fl-border;
+  }
+
+  .modal-body {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  // 左侧分类导航（贴着内容区左边，所以不需要额外左边距）
+  .settings-modal-nav {
+    flex: 0 0 160px;
+    // FIXED: 2026-11-01 左右各留 4px：原来 padding 为 0 时，选中项的底色紧贴边线，很局促
+    padding: 14px 4px;
+    overflow-y: auto;
+    border-right: 1px solid @fl-border;
+    background-color: @fl-surface-raised;
+  }
+
+  .settings-modal-nav-item {
+    display: block;
+    width: 100%;
+    padding: 9px 14px;
+    border: 0;
+    border-radius: 4px;
+    background: none;
+    text-align: left;
+    font-size: 13px;
+    color: @fl-text-muted;
+
+    &:hover {
+      color: @fl-text;
+      background-color: @fl-surface;
+    }
+
+    &.active {
+      color: @ol-green;
+      font-weight: 600;
+      background-color: @fl-surface;
+      box-shadow: inset 3px 0 0 @ol-green;
+    }
+  }
+
+  // 右侧设置项：四周留白，别贴着边框
+  .settings-modal-panel {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 18px 26px 22px;
+    overflow-y: auto;
+  }
+
+  // 这一行沿用 #left-menu 里 .left-menu-setting 的排版，但配色走主题 token
+  .left-menu-setting {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: flex-end;
+    padding: 2px 0;
+    margin-bottom: 0;
+    border-bottom: 1px solid @fl-border;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    label {
+      flex: 1 0 50%;
+      margin-top: 9px;
+      margin-bottom: 0;
+      padding-right: 12px;
+      font-weight: normal;
+      color: @fl-text;
+      white-space: nowrap;
+    }
+
+    // 「编辑词典」这类按钮行也要跟 select 一样靠右占半行
+    button {
+      width: 50%;
+      margin: 9px 0;
+    }
+
+    select.form-control {
+      width: 50%;
+      height: 26px;
+      margin: 9px 0;
+      padding: 1px @padding-xs;
+      font-size: inherit;
+      color: @fl-text;
+      background-color: @fl-surface;
+      border-color: @fl-border;
+
+      &:hover {
+        background-color: @fl-surface-raised;
+      }
+    }
+  }
+}
+
+// FIXED: 2026-11-01 设置 → AI 助手 → AMiner 搜索（互联网论文检索，默认关闭）
+.settings-aminer-search {
+  .settings-aminer-hint {
+    margin: 0 0 8px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: @fl-text-muted;
+
+    a {
+      color: @fl-link;
+      text-decoration: underline;
+    }
+  }
+
+  input.form-control {
+    width: 100%;
+    height: 26px;
+    padding: 1px @padding-xs;
+    font-size: inherit;
+    color: @fl-text;
+    background-color: @fl-surface;
+    border-color: @fl-border;
+
+    &:hover {
+      background-color: @fl-surface-raised;
+    }
+  }
+
+  .settings-aminer-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .settings-aminer-status {
+    font-size: 12px;
+
+    &.is-on {
+      color: @fl-link;
+    }
+
+    &.is-off {
+      color: @fl-text-subtle;
+    }
+  }
+
+  .settings-aminer-message {
+    margin: 8px 0 0;
+    font-size: 12px;
+    line-height: 1.5;
+
+    &.is-ok {
+      color: @fl-link;
+    }
+
+    &.is-error {
+      color: @brand-danger;
+    }
+  }
+}
+
+// FIXED: 2026-11-01 设置 → AI 助手 → AI 用量（只读摘要，数据与账号设置页同源）
+.settings-ai-usage {
+  .settings-ai-usage-line {
+    margin: 0 0 4px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: @fl-text;
+  }
+
+  .settings-ai-usage-sub {
+    color: @fl-text-muted;
+
+    a {
+      color: @fl-link;
+      text-decoration: underline;
+    }
+  }
+
+  .settings-ai-usage-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: @fl-link;
+  }
+}
+
+// FIXED: 2026-11-01 边栏（#left-menu）里的设置项太窄：
+// 原来 label 与控件各占 50%，在 ~220px 的侧栏里，长标签会折行/被截断，
+// 新加的 AMiner 输入框更只有一半宽，完全没法用。
+// 这里只在边栏模式改成「标签一行、控件一行」，弹窗模式（面积大）保持不变。
+#left-menu form.settings {
+  .left-menu-setting {
+    display: block;
+    padding: 0 9px 6px;
+
+    label {
+      flex: none;
+      display: block;
+      margin: 8px 0 4px;
+      padding-right: 0;
+      white-space: normal;
+    }
+
+    select,
+    button,
+    input.form-control {
+      width: 100%;
+      margin: 0 0 4px;
+    }
+
+    // 多选/复选类的内联控件不要被撑成整行
+    input[type='checkbox'],
+    input[type='radio'] {
+      width: auto;
+    }
+  }
+}
+
+// FIXED: 2026-11-01 AI 用量里的「刷新」链接（内联、跟正文同样式）
+.settings-ai-usage .settings-ai-usage-refresh {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 12px;
+  color: @fl-link;
+  text-decoration: underline;
+  vertical-align: baseline;
+
+  &:hover,
+  &:focus {
+    color: @fl-link-bright;
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    color: @fl-text-subtle;
+    cursor: default;
+  }
+}
+
+// FIXED: 2026-11 设置 → AI 助手 → Agent 耐心程度（档位下拉 + 一行说明）
+// 结构与 AMiner 那一项一致：label 在左、控件与说明在右，配色全走主题 token
+.settings-agent-effort {
+  flex: 1 0 50%;
+  min-width: 0;
+
+  .settings-agent-effort-current {
+    margin: 8px 0 0;
+    font-size: 12px;
+    line-height: 1.6;
+    color: @fl-text;
+  }
+
+  .settings-agent-effort-hint {
+    margin: 2px 0 0;
+    font-size: 12px;
+    line-height: 1.6;
+    color: @fl-text-muted;
+  }
+
+  .settings-agent-effort-message {
+    margin: 6px 0 0;
+    font-size: 12px;
+
+    &.is-ok {
+      color: @fl-link;
+    }
+
+    &.is-pending {
+      color: @fl-text-subtle;
+    }
+
+    &.is-error {
+      color: @brand-danger;
+    }
+  }
+}
+
+// FIXED: 2026-11-01 「清除（关闭）」按钮：不能用 .btn-default。
+// 柔和主题里 @fl-btn-secondary-bg(#fdfcf8) 与面板底色(#fdfcf8) 几乎同色，
+// 按钮会退化成一个看不出边界的文字（默认/亮色主题是深灰蓝底，所以只有柔和主题异常）。
+// 与主题色无关的写法：红色描边 + 红字，hover 才填充，三种主题都清晰。
+.settings-aminer-search .settings-aminer-clear {
+  background-color: transparent;
+  border: 1px solid @brand-danger;
+  color: @brand-danger;
+
+  &:hover,
+  &:focus,
+  &.active {
+    background-color: @brand-danger;
+    border-color: @brand-danger;
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+// FIXED: 2026-11-13 设置 → AI 助手 → MCP 服务（远程 MCP 客户端）
+// 布局沿用 AMiner 那一块的做法（同一分组里两行风格要一致），
+// 只是多了「服务列表」这个纵向堆叠的部分。
+.settings-mcp {
+  .settings-mcp-hint {
+    margin: 0 0 8px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: @fl-text-muted;
+  }
+
+  textarea.settings-mcp-paste {
+    width: 100%;
+    font-family: @font-family-monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    color: @fl-text;
+    background-color: @fl-surface;
+    border-color: @fl-border;
+    resize: vertical;
+  }
+
+  input.form-control {
+    height: 26px;
+    padding: 1px @padding-xs;
+    font-size: inherit;
+    color: @fl-text;
+    background-color: @fl-surface;
+    border-color: @fl-border;
+
+    &:hover {
+      background-color: @fl-surface-raised;
+    }
+  }
+
+  .settings-mcp-actions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .settings-mcp-counter {
+    font-size: 12px;
+    color: @fl-text-subtle;
+  }
+
+  .settings-mcp-list {
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .settings-mcp-item {
+    margin-bottom: 8px;
+    padding: 8px;
+    border: 1px solid @fl-border;
+    border-radius: 4px;
+    background-color: @fl-surface;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .settings-mcp-item-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .settings-mcp-name {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .settings-mcp-url {
+    width: 100%;
+  }
+
+  .settings-mcp-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    font-size: 12px;
+    color: @fl-text-muted;
+    white-space: nowrap;
+    cursor: pointer;
+
+    input {
+      margin: 0;
+    }
+  }
+
+  .settings-mcp-headers,
+  .settings-mcp-tools,
+  .settings-mcp-warn {
+    margin: 6px 0 0;
+    font-size: 12px;
+    line-height: 1.5;
+    word-break: break-all;
+  }
+
+  .settings-mcp-headers,
+  .settings-mcp-tools {
+    color: @fl-text-subtle;
+  }
+
+  .settings-mcp-warn {
+    color: @brand-warning;
+  }
+
+  .settings-mcp-item-actions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  // FIXED: 2026-11-15 这一组按钮之前「看不出是按钮」，三个原因叠在一起：
+  //   1. .btn 基类是 `border: 0`（不是 bootstrap 默认的 1px），没变体就等于没有边框；
+  //   2. .btn-secondary 在柔和主题里底/边都贴着面板底色（与本文件 537 行同一个坑）；
+  //   3. .btn:hover 会把文字刷成 #fff —— 没有底色的按钮 hover 时直接消失。
+  // 所以这里不依赖任何按钮变体：描边色用 @fl-text 的透明档，hover 才上 @fl-surface-raised，
+  // 三个主题（默认/柔和/亮色，以及 IEEE）都是同一套逻辑，只是取色不同。
+  // 同时把宽度钉死成 auto + align-self: center，避免被父级的 stretch 拉成通栏长条。
+  .settings-mcp-actions > .btn,
+  .settings-mcp-item-actions > .btn {
+    flex: 0 0 auto;
+    align-self: center;
+    width: auto;
+    max-width: 100%;
+    padding: 4px 12px;
+    font-size: 12px;
+    line-height: 18px;
+    color: @fl-text;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 1px solid fade(@fl-text, 30%);
+    border-radius: 6px;
+
+    &:hover,
+    &:focus,
+    &.active {
+      color: @fl-text;
+      background-color: @fl-surface-raised;
+      border-color: fade(@fl-text, 45%);
+    }
+
+    &:disabled {
+      opacity: 0.55;
+    }
+  }
+
+  // 特异性顺序：上面 `>.btn` 那条（0,3,0）会盖掉 `.settings-mcp-remove`（0,2,0）的红描边，
+  // 所以「删除」要在后面重新声明一次，保持「红字红框、hover 才填充」。
+  .settings-mcp-item-actions > .settings-mcp-remove {
+    color: @brand-danger;
+    background-color: transparent;
+    border: 1px solid @brand-danger;
+
+    &:hover,
+    &:focus,
+    &.active {
+      color: #fff;
+      background-color: @brand-danger;
+      border-color: @brand-danger;
+    }
+
+    &:disabled {
+      opacity: 0.55;
+    }
+  }
+
+  // 主按钮（保存 / 解析并添加）保持填充。取 @btn-primary-bg 而不是 @fl-link：
+  // 前者才是三主题的动作色（默认蓝 / 亮色绿 / 柔和暖橙 / IEEE 蓝），@fl-link 在
+  // 亮色主题里仍会退回默认蓝，和 .btn-primary 撞成两种蓝。
+  .settings-mcp-actions > .btn-primary,
+  .settings-mcp-item-actions > .btn-primary {
+    color: #fff;
+    background-color: @btn-primary-bg;
+    border-color: @btn-primary-bg;
+
+    &:hover,
+    &:focus,
+    &.active {
+      color: #fff;
+      background-color: darken(@btn-primary-bg, 8%);
+      border-color: darken(@btn-primary-bg, 8%);
+    }
+  }
+
+  .settings-mcp-item-status,
+  .settings-mcp-message {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .settings-mcp-item-status {
+    &.is-ok {
+      color: @fl-link;
+    }
+
+    &.is-error {
+      color: @brand-danger;
+    }
+  }
+
+  .settings-mcp-message {
+    margin: 8px 0 0;
+
+    &.is-ok {
+      color: @fl-link;
+    }
+
+    &.is-error {
+      color: @brand-danger;
+    }
+  }
+
+  // 与 AMiner 的「清除」同一套处理：不用 .btn-default（柔和主题下看不见边界）
+  .settings-mcp-remove {
+    background-color: transparent;
+    border: 1px solid @brand-danger;
+    color: @brand-danger;
+
+    &:hover,
+    &:focus,
+    &.active {
+      background-color: @brand-danger;
+      border-color: @brand-danger;
+      color: #fff;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+    }
+  }
+}

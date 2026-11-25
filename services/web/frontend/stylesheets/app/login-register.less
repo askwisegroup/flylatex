@@ -1,0 +1,517 @@
+@brand-ieee-color: #00629b;
+@brand-google-color: #276fea; // Not the "official" color but modified for a11y
+@brand-twitter-color: #1da1f2;
+@brand-orcid-color: #a6ce39;
+@brand-sharelatex-color: #a93529;
+
+.login-register-alternatives {
+  .form-group:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.login-register-container {
+  max-width: 400px;
+  margin: 0 auto;
+}
+.login-register-header {
+  padding-top: @line-height-computed;
+  padding-bottom: @line-height-computed - 5;
+  border-bottom: solid 1px @hr-border;
+}
+.login-register-header-heading {
+  margin: 0;
+  color: @text-color;
+}
+
+.login-register-card {
+  padding-top: 0;
+  padding-bottom: 0;
+  text-align: center;
+}
+
+.login-register-form,
+.login-register-sharelatex {
+  padding: @line-height-computed;
+  border-bottom: solid 1px @hr-border;
+  &:last-child {
+    border-bottom-width: 0;
+  }
+}
+.login-register-other-links {
+  padding: @line-height-computed;
+}
+
+.login-register-text,
+.login-register-hr-text-container {
+  margin: 0;
+}
+
+.login-register-text {
+  padding-bottom: 25px;
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.login-register-hr-text-container {
+  line-height: 1;
+  position: relative;
+  padding: @line-height-computed 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    height: 1px;
+    background-color: @hr-border;
+    top: 50%;
+    left: 0;
+    right: 0;
+  }
+}
+.login-register-hr-text {
+  position: relative;
+  background-color: #fff;
+  padding: 0 (@line-height-computed / 2);
+}
+.login-register-sharelatex-tooltip {
+  display: inline-block;
+  font-size: 135%;
+  position: relative;
+  top: 2px;
+  margin-left: 3px;
+  color: @link-color;
+  cursor: pointer;
+}
+
+.login-register-newsletter {
+  font-size: 90%;
+  margin-top: @line-height-computed;
+  text-align: left;
+
+  & > .checkbox {
+    margin-bottom: 0;
+  }
+}
+
+.login-btn-sharelatex {
+  background-color: @brand-sharelatex-color;
+  &:focus,
+  &:hover {
+    background-color: darken(@brand-sharelatex-color, 8%);
+  }
+  &:active {
+    background-color: darken(@brand-sharelatex-color, 16%);
+  }
+}
+
+.login-btn-icon {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: #fff url(../../../public/img/brand/lion.svg) center/20px no-repeat;
+  border-radius: @border-radius-pill;
+  width: 26px;
+  height: 26px;
+
+  &::before {
+    content: '\00a0'; // Non-breakable space. A non-breakable character here makes this icon work like font-awesome.
+  }
+}
+
+.login-btn-icon-ieee {
+  background-image: url(../../../public/img/other-brands/logo_ieee.svg);
+}
+.login-btn-icon-google {
+  background-image: url(../../../public/img/other-brands/logo_google.svg);
+}
+.login-btn-icon-twitter {
+  background-image: url(../../../public/img/other-brands/logo_twitter.svg);
+}
+.login-btn-icon-orcid {
+  background-image: url(../../../public/img/other-brands/logo_orcid.svg);
+}
+.login-btn-icon-institution {
+  background-image: url(../../../public/img/other-brands/logo_institution.svg);
+}
+.login-btn-icon-sharelatex {
+  background-size: 22px;
+}
+
+.registration-message-heading {
+  color: @text-color;
+}
+
+.registration-message-details {
+  font-size: 90%;
+}
+
+.registration-block-separator {
+  margin-bottom: 0px;
+}
+
+// ===========================================================================
+// FIXED: 2026-11-15 登录页（方案 B）—— 分段器 + 单一动作色
+//
+// 为什么只认 @fl-action 一个色：
+//   IEEE 主题里 @ol-green 是深绿 #00843d，而 @btn-primary-bg 被覆盖成蓝 #00629b。
+//   如果分段器用 @ol-green、按钮用 btn-primary，同屏就同时出现绿和蓝。
+//   所以这里全部走 @fl-action: @btn-primary-bg，灰阶走 @text-color 的透明档，
+//   不再出现任何硬编码色值（原来模板里写死 6 处 #8b95a1，柔和主题暖底上会发脏）。
+// ===========================================================================
+@fl-action: @btn-primary-bg;
+// card 面在本项目三个主题里都是白，自带一个变量而不是引用 @panel-bg：
+// main-light/soft/ieee 三个入口不导入 bootstrap 的 variables，@panel-bg 会 undefined
+@fl-login-surface: #fff;
+@fl-login-danger: #b91c1c;
+// STYLE: 2026-11-19 登录页圆角并入全站刻度（原来 14px 卡片 + 9px 输入框，
+// 和 4px 的按钮放在一起是两套语言）。卡片走「大容器」档，输入框走默认档。
+@fl-login-radius: @border-radius-base-new;
+@fl-login-radius-sm: @border-radius-base;
+@fl-login-muted: fade(@text-color, 58%);
+@fl-login-line: fade(@text-color, 14%);
+
+.fl-login {
+  max-width: 420px;
+  margin: 0 auto;
+
+  &__card {
+    // FIXED: 2026-11-15 去边框。边框 + 灰底轨道 + 描边按钮叠在一起就是「一排圆角方框」，
+    // 现在靠白底/页面底色 + 留白分层，卡片自己不再画框。
+    padding: 30px 28px 24px;
+    background: @fl-login-surface;
+    border: 0;
+    border-radius: @fl-login-radius;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: @text-color;
+  }
+
+  &__subtitle {
+    margin: 6px 0 20px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: @fl-login-muted;
+  }
+
+  // 没有副标题时（sg 只有 Google）标题和信息块之间要自己留出间距
+  &__title + &__google {
+    margin-top: 20px;
+  }
+
+  &__subtitle + &__google {
+    margin-top: 0;
+  }
+
+  &__google {
+    margin-bottom: 16px;
+  }
+
+  // 真分隔线（原来 .divider-or 一条样式都没有，「或」是裸文字）
+  &__divider {
+    position: relative;
+    margin: 20px 0 16px;
+    text-align: center;
+
+    &::before {
+      position: absolute;
+      top: 50%;
+      right: 0;
+      left: 0;
+      height: 1px;
+      content: '';
+      background: @fl-login-line;
+    }
+
+    &-text {
+      position: relative;
+      padding: 0 12px;
+      font-size: 12px;
+      color: @fl-login-muted;
+      background: @fl-login-surface;
+    }
+  }
+
+  // 分段器：只装「原地换表单」的登录方式（密码 / 短信）
+  // FIXED: 2026-11-15 不再用「灰底轨道 + 白色胶囊」：那是一个大圆角方框里再套两个，
+  // 一屏就多出三个框。改成下划线页签，只有一条 1px 线和选中态的一道 2px 主色。
+  &__seg {
+    display: flex;
+    gap: 22px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid @fl-login-line;
+
+    &-btn {
+      flex: 0 0 auto;
+      padding: 6px 0 9px;
+      font-size: 14px;
+      line-height: 20px;
+      color: @fl-login-muted;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: inset 0 -2px 0 transparent;
+      transition: color 0.15s ease, box-shadow 0.15s ease;
+
+      &:hover,
+      &:focus,
+      &:active {
+        color: @text-color;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+      }
+
+      // ne-login-captcha.js 用 classList.toggle('btn-primary') 标记当前分段
+      &.btn-primary,
+      &.btn-primary:hover,
+      &.btn-primary:focus,
+      &.btn-primary:active {
+        color: @text-color;
+        font-weight: 600;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: inset 0 -2px 0 @fl-action;
+      }
+    }
+  }
+
+  &__field {
+    margin-bottom: 14px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: @text-color;
+  }
+
+  &__label-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 6px;
+
+    .fl-login__label {
+      margin-bottom: 0;
+    }
+  }
+
+  &__label-link {
+    font-size: 12px;
+    color: @fl-action;
+    text-decoration: none;
+
+    &:hover,
+    &:focus {
+      text-decoration: underline;
+    }
+  }
+
+  &__input {
+    height: 44px;
+    padding: 11px 14px;
+    font-size: 14px;
+    color: @text-color;
+    background: @fl-login-surface;
+    // 描边压到 13% 的主文字色：还是要看得见，但不跟卡片抢戏
+    border: 1px solid fade(@text-color, 13%);
+    border-radius: @fl-login-radius-sm;
+    box-shadow: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &::placeholder {
+      color: fade(@text-color, 38%);
+    }
+
+    &:focus {
+      border-color: @fl-action;
+      outline: 0;
+      box-shadow: 0 0 0 3px fade(@fl-action, 18%);
+    }
+
+    // FIXED: 2026-11-15 Chrome 自动填充会把输入框整块刷成浅蓝（截图里邮箱和密码
+    // 那两块），和三个主题都不搭。用 inset 阴影盖回面板底色，文字色也拉回主题色。
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus {
+      -webkit-text-fill-color: @text-color;
+      box-shadow: 0 0 0 100px @fl-login-surface inset;
+      transition: background-color 9999s ease-in-out 0s;
+    }
+  }
+
+  // 短信：发送验证码并进输入框右侧，不再独占一行
+  &__group {
+    .fl-login__input {
+      border-right: 0;
+      border-radius: @fl-login-radius-sm 0 0 @fl-login-radius-sm;
+    }
+
+    .input-group-btn > .btn {
+      height: 42px;
+      padding: 0 12px;
+      font-size: 13px;
+      color: @fl-action;
+      background: fade(@fl-action, 8%);
+      border: 1px solid @fl-login-line;
+      border-left: 0;
+      border-radius: 0 @fl-login-radius-sm @fl-login-radius-sm 0;
+
+      &:hover:not(:disabled),
+      &:focus:not(:disabled) {
+        color: @fl-action;
+        background: fade(@fl-action, 14%);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+      }
+    }
+  }
+
+  &__status {
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: @fl-login-muted;
+
+    &:empty {
+      display: none;
+    }
+
+    &.is-error {
+      color: @fl-login-danger;
+    }
+  }
+
+  // 人机验证：NE 账号中心可关闭；关闭时 ne-login-captcha.js 给整个
+  // .fl-login__captcha 加 hidden，这里不需要额外兜底
+  &__captcha {
+    margin-bottom: 14px;
+  }
+
+  &__captcha-slot {
+    min-height: 44px;
+  }
+
+  &__actions {
+    margin-top: 18px;
+  }
+
+  &__submit {
+    height: 46px;
+    padding: 0 12px;
+    font-size: 15px;
+    font-weight: 500;
+    // 按钮圆角跟输入框取同一档，原来 .btn 是 9999px 胶囊、输入框 9px，两块对不上
+    border-radius: @fl-login-radius-sm;
+  }
+
+  // CARSI：跨站跳转，绝不能和「登录」抢主色
+  &__sso {
+    text-align: center;
+  }
+
+  &__sso-btn {
+    // FIXED: 2026-11-15 从描边按钮降为文字链接：一屏只该有一个「看起来能按」的实心块，
+    // 那个是「登录」。跳转类的入口用链接 + ↗ 表示会离开本页，比再画一个框干净。
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    padding: 6px 4px;
+    font-size: 14px;
+    color: @fl-action;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+
+    &::after {
+      font-size: 12px;
+      content: '\2197';
+      opacity: 0.75;
+    }
+
+    &:hover,
+    &:focus {
+      color: darken(@fl-action, 8%);
+      text-decoration: underline;
+      background: transparent;
+      border: 0;
+    }
+
+    // 只有 CARSI 一种登录方式时（纯机构部署）它才是整页唯一的主动作
+    &.btn-primary,
+    &.btn-primary:hover,
+    &.btn-primary:focus {
+      height: 46px;
+      padding: 0 16px;
+      color: #fff;
+      text-decoration: none;
+      background: @fl-action;
+      border: 0;
+      border-radius: @fl-login-radius-sm;
+    }
+  }
+
+  &__sso-hint {
+    margin: 8px 0 0;
+    font-size: 12px;
+    line-height: 1.6;
+    color: @fl-login-muted;
+  }
+
+  &__footer {
+    padding-top: 16px;
+    margin-top: 20px;
+    font-size: 13px;
+    color: @fl-login-muted;
+    text-align: center;
+    border-top: 1px solid @fl-login-line;
+  }
+
+  &__footer-link {
+    margin-left: 4px;
+    color: @fl-action;
+    text-decoration: none;
+
+    &:hover,
+    &:focus {
+      text-decoration: underline;
+    }
+  }
+
+  // 表单级错误（+formMessages() 注入的 .alert）
+  [data-ol-form-messages] .alert {
+    padding: 9px 12px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    border-radius: @fl-login-radius-sm;
+  }
+
+  .btn-block {
+    width: 100%;
+  }
+}
+
+@media (max-width: 767px) {
+  .fl-login__card {
+    padding: 22px 18px;
+  }
+}

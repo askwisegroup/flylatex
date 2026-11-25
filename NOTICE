@@ -1,0 +1,42 @@
+FlyLaTeX Community Edition
+Copyright (C) 2024-2026 the FlyLaTeX contributors
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU Affero General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option) any
+later version. See LICENSE for the full text.
+
+--------------------------------------------------------------------------------
+Upstream work
+--------------------------------------------------------------------------------
+
+This project is a derivative work of Overleaf Community Edition:
+
+  https://github.com/overleaf/overleaf
+  Copyright (C) Overleaf Ltd. and Overleaf contributors
+  Licensed under the GNU Affero General Public License v3
+
+The fork point is upstream commit 811172f1fa (2024-01-16). The vendored
+packages under libraries/ originate from the same commit and keep their own
+copyright notices.
+
+--------------------------------------------------------------------------------
+Third-party components
+--------------------------------------------------------------------------------
+
+The dependency tree contains third-party packages under their own licenses
+(MIT, Apache-2.0, BSD, ...). See package-lock.json and the LICENSE files inside
+the vendored packages for details.
+
+TeX Live, the LaTeX kernel and the LaTeX packages installed alongside this
+software are distributed under the LaTeX Project Public License (LPPL) and
+other free licenses; they are not covered by this project's AGPL grant.
+
+--------------------------------------------------------------------------------
+Trademarks
+--------------------------------------------------------------------------------
+
+"Overleaf" is a trademark of Overleaf Ltd. "LaTeX" is a trademark of the LaTeX
+Project. The AGPL grants a copyright license, not a trademark license; nothing
+in this repository grants the right to use those marks for your own product.
+This edition is distributed under the name "FlyLaTeX".

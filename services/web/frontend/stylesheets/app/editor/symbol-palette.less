@@ -1,0 +1,147 @@
+// FIXED: 2026-11-13 符号面板（参考 Overleaf Pro modules/symbol-palette 的面板本体）
+//
+// 底栏抽屉样式：贴在编辑区底部，不遮挡正文太久；颜色走 --fl-* 变量。
+// 不要在这里用 Less 的 min()/max()（见 command-palette.less 的踩坑记录）。
+
+.fl-symbol-palette-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 19900; // 低于命令面板（20000），高于 AI 浮层（10000）
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 16px 24px;
+  background: rgba(15, 23, 42, 0.12);
+}
+
+.fl-symbol-palette {
+  width: 720px;
+  max-width: 92vw;
+  max-height: 46vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--fl-surface, #fff);
+  border: 1px solid var(--fl-border, #d7dde6);
+  border-radius: 10px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.22);
+  overflow: hidden;
+}
+
+.fl-symbol-palette-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--fl-border, #e6ebf1);
+}
+
+.fl-symbol-palette-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fl-text, #1f2937);
+  white-space: nowrap;
+}
+
+.fl-symbol-palette-search {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--fl-border, #d7dde6);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fl-text, #1f2937);
+  font-size: 13px;
+  outline: none;
+}
+
+.fl-symbol-palette-close {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fl-text-muted, #6b7280);
+  cursor: pointer;
+  font-size: 13px;
+
+  &:hover {
+    background: var(--fl-surface-raised, #f3f4f6);
+  }
+}
+
+.fl-symbol-palette-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 12px 0;
+  flex-wrap: wrap;
+}
+
+.fl-symbol-palette-tab {
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: @border-radius-small;
+  background: transparent;
+  color: var(--fl-text-muted, #6b7280);
+  font-size: 12px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--fl-surface-raised, #f3f4f6);
+  }
+
+  &.active {
+    background: fade(@ol-green, 12%);
+    border-color: fade(@ol-green, 45%);
+    color: @ol-green;
+  }
+}
+
+.fl-symbol-palette-grid {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 6px;
+  padding: 10px 12px 14px;
+}
+
+.fl-symbol-palette-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border: 1px solid var(--fl-border, #e6ebf1);
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--fl-text, #1f2937);
+
+  &:hover {
+    background: fade(@ol-green, 10%);
+    border-color: fade(@ol-green, 40%);
+  }
+}
+
+.fl-symbol-palette-glyph {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.fl-symbol-palette-command {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  color: var(--fl-text-muted, #6b7280);
+}
+
+.fl-symbol-palette-empty {
+  grid-column: 1 / -1;
+  padding: 16px 4px;
+  font-size: 13px;
+  color: var(--fl-text-muted, #6b7280);
+}

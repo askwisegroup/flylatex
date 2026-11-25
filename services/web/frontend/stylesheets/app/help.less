@@ -1,0 +1,308 @@
+// ============================================================================
+// 帮助中心（/help）
+//
+// 布局：左侧目录（sticky，滚动时始终可见，方便随时切换主题）+ 右侧内容。
+// 与主题无关：柔和 / 浅色 / 默认主题共用这一套规则，不依赖 normalize、
+// scaffolding、marketing 的全局样式；颜色按温和的米白纸感配色固定写死，
+// 只有强调色从主题的 @link-color 取。
+// ============================================================================
+
+@help-toc-width: 264px;
+@help-gap: clamp(28px, 2.4vw, 56px);
+@help-sticky-top: 24px;
+@help-line: #e7dfd1; // 卡片描边
+@help-card: #fffdf9; // 卡片底
+@help-muted: #8a7f70; // 次要文字
+@help-code-bg: #f4ece0;
+@help-code-line: #e3d8c6;
+@help-code-color: #a1322b;
+
+.help-page {
+  display: grid;
+  grid-template-columns: @help-toc-width minmax(0, 1fr);
+  grid-template-rows: auto auto 1fr;
+  column-gap: @help-gap;
+  align-items: start;
+  // 不定宽：宽度跟着屏幕走，4K / 超宽屏一样铺满，只靠 padding 留白
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 40px clamp(24px, 3vw, 80px) 96px;
+}
+
+.help-page > h1,
+.help-page > .help-sub {
+  // 注意：不能写 grid-column: 1 / -1 —— Less 会把 "/" 当除法，编译成 -1，
+  // 导致新建一条隐式列把内容挤窄。用 start/end 两个单值属性最稳。
+  grid-column-start: 1;
+  grid-column-end: -1;
+}
+
+.help-page > h1 {
+  margin: 0 0 6px;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.help-page > .help-sub {
+  margin: 0 0 28px;
+  font-size: 14px;
+  color: @help-muted;
+}
+
+// ---------------------------------------------------------------- 左侧目录
+.help-page > .help-toc {
+  position: -webkit-sticky;
+  position: sticky;
+  top: @help-sticky-top;
+  align-self: start;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 14px 10px 14px 16px;
+  background: @help-card;
+  border: 1px solid @help-line;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(60, 45, 30, 0.04);
+  font-size: 13.5px;
+
+  > strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #a2957f;
+  }
+
+  ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: help-toc;
+  }
+
+  li {
+    margin: 1px 0;
+    counter-increment: help-toc;
+  }
+
+  a {
+    display: flex;
+    gap: 8px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    color: #4b4237;
+    line-height: 1.45;
+    text-decoration: none;
+    transition: background-color 0.12s, color 0.12s;
+
+    &::before {
+      content: counter(help-toc) ".";
+      min-width: 16px;
+      color: #b3a795;
+      font-variant-numeric: tabular-nums;
+    }
+
+    &:hover {
+      background: #f5eee2;
+      color: @link-color;
+    }
+
+    &:focus-visible {
+      outline: 2px solid @link-color;
+      outline-offset: 1px;
+    }
+
+    &.is-active {
+      background: #f1e7d7;
+      color: @link-color;
+      font-weight: 600;
+    }
+
+    &.is-active::before {
+      color: @link-color;
+    }
+  }
+}
+
+// ---------------------------------------------------------------- 右侧内容
+.help-page > .help-body {
+  grid-column: 2;
+  min-width: 0; // 允许表格/代码块收缩，不撑破网格
+}
+
+.help-page section {
+  margin-bottom: 20px;
+  padding: 24px 28px;
+  background: @help-card;
+  border: 1px solid @help-line;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(60, 45, 30, 0.04);
+  scroll-margin-top: @help-sticky-top + 12px; // 锚点跳转不被切掉标题
+
+  > h2 {
+    margin: -2px 0 14px;
+    padding-left: 12px;
+    border-left: 3px solid @link-color;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  h3 {
+    margin: 20px 0 6px;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: #6b5f50;
+  }
+
+  p {
+    margin: 0 0 10px;
+    line-height: 1.8;
+    // 卡片随屏幕铺开，正文限行宽（约 80 字符），超宽屏上不会一行两百字
+    max-width: 80ch;
+  }
+
+  ul,
+  ol {
+    margin: 0 0 10px;
+    padding-left: 22px;
+    max-width: 84ch;
+  }
+
+  li {
+    margin: 3px 0;
+    line-height: 1.8;
+  }
+
+  strong {
+    font-weight: 600;
+  }
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+// ---------------------------------------------------------------- 代码
+// LaTeX 命令一律等宽 + 浅底 + 描边，绝不混在正文里
+.help-page code {
+  padding: 1px 5px;
+  font-family: @font-family-monospace;
+  font-size: 12.5px;
+  color: @help-code-color;
+  background: @help-code-bg;
+  border: 1px solid @help-code-line;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.help-page pre {
+  margin: 0 0 12px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  font-family: @font-family-monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  background: #f9f5ee;
+  border: 1px solid @help-line;
+  border-radius: 8px;
+  tab-size: 2;
+
+  code {
+    padding: 0;
+    color: #3d352b;
+    background: none;
+    border: 0;
+  }
+}
+
+// ---------------------------------------------------------------- 表格
+.help-page table.help-table {
+  width: 100%;
+  margin: 12px 0 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13.5px;
+
+  th,
+  td {
+    padding: 9px 11px;
+    border: 1px solid @help-line;
+    text-align: left;
+    vertical-align: top;
+    line-height: 1.7;
+    overflow-wrap: break-word;
+  }
+
+  th {
+    font-weight: 600;
+    background: #f9f4ec;
+  }
+
+  td:first-child {
+    width: 33%;
+  }
+}
+
+.help-page .help-note {
+  font-size: 13px;
+  color: @help-muted;
+}
+
+// ---------------------------------------------------------------- 窄屏
+@media (max-width: 960px) {
+  .help-page {
+    grid-template-columns: minmax(0, 1fr);
+    column-gap: 0;
+    padding: 24px 20px 72px;
+  }
+
+  // 目录改为顶部双列，不再吸顶（横屏空间不够会挡住内容）
+  .help-page > .help-toc {
+    position: static;
+    max-height: none;
+    margin-bottom: 24px;
+
+    ol {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 12px;
+    }
+  }
+
+  .help-page > .help-body {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 560px) {
+  .help-page {
+    padding: 20px 14px 56px;
+  }
+
+  .help-page section {
+    padding: 18px 16px;
+  }
+
+  .help-page > .help-toc ol {
+    grid-template-columns: 1fr;
+  }
+
+  .help-page table.help-table {
+    font-size: 13px;
+
+    th,
+    td {
+      padding: 7px 8px;
+    }
+
+    td:first-child {
+      width: 40%;
+    }
+  }
+}

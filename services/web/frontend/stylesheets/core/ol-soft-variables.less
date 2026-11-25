@@ -1,0 +1,142 @@
+// ============================================================
+// 主题：柔和色调（soft，暖调，参考 Claude 的配色）
+// ============================================================
+//
+// 做法：先继承亮色调主题的全部修正，再把"冷灰蓝"换成"暖米色 + 陶土橙"。
+// 这里覆盖的是 LESS 变量，所以每个主题各编译一份 CSS，
+// 由 app 里的"设置 → 主题"切换（见 core/variables.less 的 @fl-chrome-* 说明）。
+//
+// 参考色值：bg #faf9f5 / text #2c2c2a / accent #c15f3c / border #e0d8c6
+
+@import 'ol-light-variables.less';
+
+// ---- 页面 ----
+// FIXED: 2026-10-29 柔和色调：纯白底改成羊皮纸米白，避免刺眼
+@body-bg: #faf9f5;
+@text-color: #2c2c2a;
+
+// ---- 强调色：蓝 → 陶土橙 ----
+// 取 Claude 品牌橙 #d77757 压深一档，保证白底上的对比度
+@ol-blue: #c15f3c;
+@ol-dark-blue: #a94e2f;
+@link-color: #c15f3c;
+@link-hover-color: #a94e2f;
+// 这个 fork 里 @ol-green 虽叫 green，实际是"主按钮色"（默认 #3c64cf），
+// 柔和主题下跟 @ol-blue 一起换成陶土橙，保持原来"按钮/链接同色系"的关系
+@ol-green: #c15f3c;
+@ol-dark-green: #a94e2f;
+@ol-type-green: #c15f3c;
+@ol-type-color: #2c2c2a;
+
+// ---- 外壳（chrome）：米色底 + 暖深字 ----
+@fl-chrome-bg: #efeadd;
+@fl-chrome-border: #e0d8c6;
+@fl-chrome-text: #141413;
+@fl-chrome-text-muted: #5e5d59;
+@fl-chrome-hover: #e6e0d1;
+
+// ---- 面板底色统一偏暖 ----
+@sidebar-bg: #f7f4ec;
+@file-tree-bg: #f7f4ec;
+
+// ---- 文件树（左侧）暖色版本 ----
+// FIXED: 2026-11-08 米色底上，原来的冷灰字和纯白图标几乎看不见。
+// 名字用暖深灰（对比度 ~10:1），图标/文件夹/展开箭头用暖中灰（ 3.5:1以上，
+// 既看得见又不抢名字的视线）。
+@file-tree-item-color: #35322c;
+@file-tree-item-input-color: #2c2c2a;
+@file-tree-item-icon-color: #8b8271;
+@file-tree-item-folder-color: #6b6456;
+@file-tree-item-toggle-color: #6b6456;
+@file-tree-item-hover-bg: #e6e0d1;
+@file-tree-droppable-bg-color: #b3a894;
+@outline-expand-collapse-color: #6b6456;
+@toolbar-alt-bg-color: #efeadd;
+@editor-toolbar-bg: @toolbar-alt-bg-color;
+@toolbar-header-bg-color: #efeadd;
+@chat-bg: #f7f4ec;
+@logs-pane-bg: #faf9f5;
+@symbol-palette-bg: #f7f4ec;
+@symbol-palette-header-background: #e6e0d1;
+@formatting-menu-bg: #f7f4ec;
+
+// AI 助手对话气泡：冷蓝/灰 换成 暖米/陶土
+@fl-bubble-user-bg: #f6e7dd;
+@fl-bubble-user-text: #a94e2f;
+@fl-bubble-assistant-bg: #f2efe7;
+@fl-bubble-assistant-text: #2c2c2a;
+// 主操作按钮：陶土橙
+@fl-primary-action-bg: #c15f3c;
+@fl-primary-action-hover: #a94e2f;
+
+// ---- 顶部外壳（全局导航条 + 编辑器工具栏）：暖色化 ----
+// 亮色主题里这些是纯白，柔和主题改成米色，否则页面暖、顶栏白，像两块拼接
+@navbar-default-bg: #efeadd;
+@navbar-default-border: #e0d8c6;
+@navbar-default-color: #3d3a34;
+@navbar-subdued-color: #5e5d59;
+@navbar-subdued-hover-bg: #e6e0d1;
+@navbar-subdued-hover-color: #141413;
+
+@toolbar-border-color: #e0d8c6;
+@toolbar-btn-color: #3d3a34;
+@toolbar-btn-hover-color: #141413;
+@toolbar-icon-btn-color: #3d3a34;
+@toolbar-icon-btn-hover-color: #141413;
+@project-name-color: #3d3a34;
+@project-rename-link-color: #5e5d59;
+
+// ---- 模态框（字数统计 / 快捷键 / 关于 / 重命名项目 / 搜索参考文献 …）----
+// 上游默认是纯白内容 + 冷灰页脚，套在暖色页面上像另一套 UI
+@modal-content-bg: #fdfcf8;
+@modal-content-border-color: rgba(90, 78, 60, 0.22);
+@modal-header-border-color: #e0d8c6;
+@modal-footer-background-color: #f5f2ea;
+
+// ---- 中性色阶里的"浅底"两档换成暖米（搜索面板底色/悬浮态/说明块）----
+// ---- 项目列表侧栏：继承浅色主题的修复，但换成暖灰，别把冷石板灰带进来 ----
+@sidebar-color: #5b5548;
+@sidebar-link-color: #4a453c;
+@folders-title-color: #8f8878;
+@folders-tag-menu-color: #8f8878;
+@folders-tag-border-color: #e0d8c6;
+@tag-color: #4a453c;
+@fl-navbar-gradient: none;
+@navbar-title-color: #3d3a34;
+@navbar-title-color-hover: #141413;
+
+@ol-blue-gray-0: #f7f4ec;
+@ol-blue-gray-1: #ece7dc;
+
+// ---- 表层与文字 token（TS 内联样式通过 var(--fl-*) 取用）----
+@fl-surface: #fdfcf8;
+@fl-surface-raised: #f5f2ea;
+@fl-border: #e0d8c6;
+@fl-text: #2c2c2a;
+@fl-text-muted: #6b6459;
+@fl-text-subtle: #8f8878;
+@fl-link: #a94e2f;
+@fl-link-bright: #c15f3c;
+@fl-kbd-bg: #3d3a34;
+// 注意：底色一定要比弹窗底栏(#f5f2ea)亮，否则按钮和底栏同色，看起来像"透明"
+@fl-btn-secondary-bg: #fdfcf8;
+@fl-btn-secondary-color: #3d3a34;
+// FIXED: 2026-11-01 原来 #d8cebb 与弹窗内容底色(#fdfcf8) 太接近，次要按钮看起来像一行文字；
+// 描边加深一档，保证在柔和主题下能看出这是一个按钮
+@fl-btn-secondary-border: #c3b192;
+@fl-btn-secondary-hover-bg: #f0ebdf;
+// FIXED: 2026-11-02 AI 开关按钮激活态：浅底上直接用主色（陶土）画线条
+@fl-ai-toggle-active-bg: fade(@ol-green, 12%);
+@fl-ai-toggle-active-border: fade(@ol-green, 45%);
+@fl-ai-toggle-active-color: @ol-green;
+// 分隔条把手/定位按钮：暖灰把手 + 陶土色动作按钮
+@editor-toggler-bg-color: #7d7568;
+@editor-resizer-bg-color: #e0d8c6;
+@editor-resizer-bg-color-dragging: #e0d8c6;
+// 项目列表侧栏拖拽条：跟外壳（header）同一个米色，别用更深一档的分隔条色
+@project-list-resizer-bg: @fl-chrome-bg;
+@fl-synctex-control-bg: fade(#c15f3c, 88%);
+@fl-synctex-control-bg-disabled: fade(#7d7568, 65%);
+// FIXED: 2026-11-01 同上，柔和色调用陶土色主色（@ol-blue 在这里也是 #c15f3c，
+// 但显式写 @ol-green 才不会因为以后换 @ol-blue 又跑偏）
+@fl-alert-success-bg: @ol-green;

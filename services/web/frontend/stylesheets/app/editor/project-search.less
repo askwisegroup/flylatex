@@ -1,0 +1,210 @@
+// FIXED: 2026-11-13 项目级全文检索面板
+//
+// 和命令面板一样用 portal 挂到 body，所以固定定位是相对视口的。
+// 颜色走 --fl-* 变量；选中/强调色用编译期的 @ol-green，三个主题各自出各自的色。
+// 注意：Less 有同名内置函数 min()/max()，别写 min(640px, 92vw)。
+
+.fl-project-search-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 19950; // 与命令面板（20000）/符号面板（19900）同一层区间
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 10vh 16px 16px;
+  background: rgba(15, 23, 42, 0.18);
+}
+
+.fl-project-search {
+  width: 760px;
+  max-width: 92vw;
+  max-height: 66vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--fl-surface, #fff);
+  border: 1px solid var(--fl-border, #d7dde6);
+  border-radius: 10px;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.24);
+  overflow: hidden;
+}
+
+.fl-project-search-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--fl-border, #e6ebf1);
+}
+
+.fl-project-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--fl-border, #d7dde6);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fl-text, #1f2937);
+  font-size: 14px;
+  outline: none;
+
+  &:focus {
+    border-color: @ol-green;
+  }
+}
+
+.fl-project-search-submit {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border: 1px solid @ol-green;
+  border-radius: 6px;
+  background: @ol-green;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+.fl-project-search-close {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fl-text-muted, #6b7280);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--fl-surface-raised, #f3f4f6);
+  }
+}
+
+.fl-project-search-options {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--fl-border, #e6ebf1);
+  font-size: 12px;
+  color: var(--fl-text-muted, #6b7280);
+  flex-wrap: wrap;
+}
+
+.fl-project-search-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: normal;
+  margin: 0;
+  cursor: pointer;
+}
+
+.fl-project-search-count {
+  margin-left: auto;
+  color: var(--fl-text-muted, #6b7280);
+}
+
+.fl-project-search-error {
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #b91c1c;
+}
+
+.fl-project-search-results {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 6px 0 10px;
+}
+
+.fl-project-search-empty {
+  padding: 18px 14px;
+  font-size: 13px;
+  color: var(--fl-text-muted, #6b7280);
+}
+
+.fl-project-search-file-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 7px 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  color: var(--fl-text, #1f2937);
+  font-size: 13px;
+  font-weight: 600;
+
+  &:hover {
+    background: var(--fl-surface-raised, #f8fafc);
+  }
+}
+
+.fl-project-search-caret {
+  width: 12px;
+  color: var(--fl-text-muted, #9ca3af);
+}
+
+.fl-project-search-path {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fl-project-search-file-count {
+  padding: 0 7px;
+  border-radius: @border-radius-pill;
+  background: fade(@ol-green, 14%);
+  color: @ol-green;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.fl-project-search-hit {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 5px 12px 5px 30px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-size: 12px;
+  color: var(--fl-text, #1f2937);
+
+  &:hover {
+    background: fade(@ol-green, 10%);
+  }
+
+  mark {
+    padding: 0 1px;
+    border-radius: 2px;
+    background: fade(@ol-green, 28%);
+    color: inherit;
+  }
+}
+
+.fl-project-search-line {
+  flex: 0 0 auto;
+  min-width: 34px;
+  text-align: right;
+  color: var(--fl-text-muted, #9ca3af);
+  font-variant-numeric: tabular-nums;
+}
+
+.fl-project-search-snippet {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--code-font, monospace);
+}

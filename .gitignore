@@ -1,0 +1,68 @@
+cron/
+# libraries/ 已随仓库提供（upstream 811172f1fa），不要忽略
+node_modules/
+resources/
+overleaf-ne-login-deprecated
+
+# NE 认证 V2 联调 demo（仅本地使用，不入库）
+demo/ne-authv2/
+
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# Python 编译缓存
+__pycache__/
+*.pyc
+.workbuddy/
+# 本地联调环境变量（含真实密钥），永不提交
+*.local.env
+
+# 本地运维脚本产物（含用户邮箱/姓名，不入库）
+services/web/scripts/users_detail.json
+
+# 部署密钥（含 LLM/支付密钥，不入库）
+deploy/.env
+
+# AI 用量记账的商业实现（写 llm_usage + 计价 + 扣费），不入库。
+# 开源仓库只有 dummy.js + impl.example.js；商业分支的部署树里才有 impl.js。
+# 契约见 services/web/app/src/Features/AiUsage/contract.md
+services/web/app/src/Features/AiUsage/impl.js
+
+# services/web 的构建产物 / 运行数据
+# FIXED: 2026-11-19 services/web/.gitignore 已删除，把仍然必要的忽略规则上提到这里，
+# 避免 public/ 下几百 MB 的构建产物被当成源码带进新仓库（新仓库只放源码）。
+services/web/public/js/
+services/web/public/minjs/
+services/web/public/stylesheets/
+services/web/public/fonts/
+services/web/public/images/
+services/web/public/manifest.json
+services/web/data/
+services/web/coverage/
+services/web/cookies.txt
+services/web/docker-shared.yml
+services/web/.npmrc
+services/web/.sentryclirc
+services/web/.idea/
+services/web/.run/
+services/web/cypress/screenshots/
+services/web/cypress/videos/
+services/web/cypress/downloads/
+services/web/cypress/results/
+services/web/frontend/js/features/source-editor/themes/ace/
+services/web/frontend/js/features/source-editor/lezer-latex/latex.mjs
+services/web/frontend/js/features/source-editor/lezer-latex/latex.terms.mjs
+services/web/frontend/js/features/source-editor/lezer-bibtex/bibtex.mjs
+services/web/frontend/js/features/source-editor/lezer-bibtex/bibtex.terms.mjs
+
+# 本地 AI 编码助手的工作目录 / 指令文件（不随仓库发布）
+.claude/
+.cursor/
+.copilot/
+.aider*
+.continue/
+.codex/
+AGENTS.md
+CLAUDE.md
+GEMINI.md

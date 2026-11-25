@@ -1,0 +1,157 @@
+extends ../layout
+
+append content
+	style.
+		body {
+			position: static !important;
+		}
+		#main-content {
+			padding-top: 0 !important;
+		}
+
+block content
+	.container(style="max-width: 600px; margin-top: 0px; padding-top: 80px;")
+		.card
+			.card-header
+				h2 #{translate('git_import_from_repository')}
+			.card-body
+				form#git-import-form
+					input(type="hidden", name="_csrf", id="csrf-token")
+
+					.form-group
+						label(for="gitUrl") #{translate('git_repository_url')}
+						input#gitUrl.form-control(type="url", name="gitUrl", placeholder="https://github.com/username/repo", required)
+
+					.form-group
+						label(for="branch") #{translate('git_branch_name')}
+						input#branch.form-control(type="text", name="branch", placeholder="main", value="main")
+						small.form-text.text-muted #{translate('git_default_main_branch')}
+
+					.form-group
+						label(for="token") #{translate('git_access_token_optional')}
+						input#token.form-control(type="password", name="token", placeholder=translate('git_private_repo_token_placeholder'))
+						small.form-text.text-muted #{translate('git_public_repo_no_token_needed')}
+
+					hr
+
+					.form-group
+						label(for="projectName") #{translate('git_project_name')}
+						input#projectName.form-control(type="text", name="projectName", placeholder=translate('git_my_latex_project'), required)
+
+					#error-message.alert.alert-danger(style="display: none;")
+
+					button#submit-btn.btn.btn-primary(type="submit") #{translate('git_import_project')}
+					| &nbsp;
+					a.btn.btn-secondary(href="/project") #{translate('cancel')}
+
+		.card.mt-3
+			.card-body
+				h5 #{translate('git_usage_instructions')}
+				ol
+					li #{translate('git_instruction_enter_url')}
+					li #{translate('git_instruction_private_repo')}
+					li #{translate('git_instruction_import')}
+				#platform-help.mt-3
+					p
+						strong #{translate('git_get_gitee_token')}
+					ol
+						li #{translate('git_gitee_token_step_1')}
+						li #{translate('git_gitee_token_step_2')}
+						li #{translate('git_gitee_token_step_3')}
+						li #{translate('git_gitee_token_step_4')}
+						li #{translate('git_gitee_token_step_5')}
+					p.text-muted
+						small #{translate('git_gitee_url_format')}
+					p.mt-3
+						strong #{translate('git_get_github_token')}
+					ol
+						li #{translate('git_github_token_step_1')}
+						li #{translate('git_github_token_step_2')}
+						li #{translate('git_github_token_step_3')}
+						li #{translate('git_github_token_step_4')}
+						li #{translate('git_github_token_step_5')}
+						li #{translate('git_github_token_step_6')}
+					p.text-muted
+						small #{translate('git_github_url_format')}
+
+append content
+	script.
+		// 从 meta 标签获取 CSRF token
+		function getCsrfToken() {
+			const meta = document.querySelector('meta[name="ol-csrfToken"]');
+			return meta ? meta.getAttribute('content') : '';
+		}
+
+		const gitUrlInput = document.getElementById('gitUrl');
+		const projectNameInput = document.getElementById('projectName');
+		const form = document.getElementById('git-import-form');
+		const submitBtn = document.getElementById('submit-btn');
+		const errorMsg = document.getElementById('error-message');
+
+		// 设置 CSRF token
+		document.getElementById('csrf-token').value = getCsrfToken();
+
+		// 当 Git URL 输入框失去焦点或内容改变时，自动提取项目名称
+		gitUrlInput.addEventListener('blur', function() {
+			const gitUrl = this.value.trim();
+			if (gitUrl && !projectNameInput.value) {
+				// 从 Git URL 中提取项目名称
+				let projectName = '';
+
+				// 移除 .git 后缀
+				const urlWithoutGit = gitUrl.replace(/\.git$/, '');
+
+				// 提取最后一部分作为项目名称
+				const parts = urlWithoutGit.split('/');
+				const lastPart = parts[parts.length - 1];
+
+				if (lastPart) {
+					projectName = lastPart;
+					// 转换为更友好的格式（将连字符和下划线转换为空格，首字母大写）
+					projectName = projectName
+						.replace(/[-_]/g, ' ')
+						.replace(/\b\w/g, l => l.toUpperCase());
+
+					projectNameInput.value = projectName;
+				}
+			}
+		});
+
+		// 表单提交处理
+		form.addEventListener('submit', async function(e) {
+			e.preventDefault();
+
+			submitBtn.disabled = true;
+			submitBtn.textContent = '#{translate('git_importing')}';
+			errorMsg.style.display = 'none';
+
+			try {
+				const formData = new FormData(form);
+				const data = new URLSearchParams(formData);
+
+				const response = await fetch('/project/from-git', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+					},
+					body: data
+				});
+
+				const result = await response.json();
+
+				if (result.success && result.projectId) {
+					window.location.href = '/project/' + result.projectId;
+				} else {
+					errorMsg.textContent = result.error || '#{translate('git_import_failed')}';
+					errorMsg.style.display = 'block';
+					submitBtn.disabled = false;
+					submitBtn.textContent = '#{translate('git_import_project')}';
+				}
+			} catch (error) {
+				errorMsg.textContent = '#{translate('git_network_error')}';
+				errorMsg.style.display = 'block';
+				submitBtn.disabled = false;
+				submitBtn.textContent = '#{translate('git_import_project')}';
+			}
+		});
+

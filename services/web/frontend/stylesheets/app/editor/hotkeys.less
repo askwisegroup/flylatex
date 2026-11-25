@@ -1,0 +1,76 @@
+// FIXED: 2026-11-19 快捷键弹窗一屏放不下。
+//
+// 现象：快捷键清单（尤其带「审阅」一段时）比视口还高，弹出的整个对话框
+// 连同标题栏、「确定」按钮一起被推到屏幕外，只能靠滚动整页去找按钮。
+//
+// 做法：
+//   1) 对话框整体限高在视口内（100vh 减去上下 30px 的 margin）
+//   2) 只有中间的 .modal-body 滚动，标题栏 / 按钮栏永远留在视野里
+//   3) 正文字号 14 → 13px，小节标题 20 → 16px，行距也收一档，
+//      能在一屏里多放几行就少滚一点
+//
+// 注意 .modal-dialog 是 flex 容器、.modal-content 继承高度、.modal-body
+// 是 flex 子项：少了 min-height: 0，子项不肯收缩，滚动条根本出不来。
+.hotkeys-modal-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(~'100vh - 60px'); // 上下各 30px 的 modal-dialog 外边距
+  margin: 30px auto;
+
+  .modal-content {
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  .modal-header,
+  .modal-footer {
+    flex: 0 0 auto;
+  }
+
+  .modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.hotkeys-modal {
+  font-size: 13px;
+
+  h3 {
+    font-size: 16px;
+    margin: 14px 0 8px;
+  }
+
+  h3:first-child {
+    margin-top: 0;
+  }
+
+  .hotkey {
+    margin-bottom: 8px;
+  }
+
+  .description {
+    display: inline-block;
+  }
+
+  .combination {
+    padding: 3px 7px;
+    border-radius: 3px;
+    // FIXED: 2026-10-29 主题化：按键块底色跟随主题（默认仍是原来的 #505050）
+    background-color: @fl-kbd-bg;
+    color: white;
+    font-family: @font-family-sans-serif;
+    font-weight: 600;
+    margin-right: @line-height-computed / 4;
+  }
+
+  .hotkeys-modal-bottom-text {
+    background-color: @ol-blue-gray-0;
+    padding: @padding-sm;
+    border-radius: 5px;
+  }
+}

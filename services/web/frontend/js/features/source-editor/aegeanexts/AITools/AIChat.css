@@ -1,0 +1,41 @@
+.AIChat {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    padding: 20px;
+    overflow: auto;
+  }
+
+  .AIChatContainer {
+    height: 90%;
+    min-height: 90%;
+    max-height: 90%;
+  }
+
+  .bottom-div {
+    padding-top: 20px;
+  }
+  
+  .history {
+    overflow-y: auto;
+  }
+  
+  .history-item {
+    margin-bottom: 10px;
+  }
+  
+  .question-form {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .question-input {
+    width: 80%;
+    padding: 10px;
+  }
+  
+  .submit-button {
+    width: 18%;
+    cursor: pointer;
+  }

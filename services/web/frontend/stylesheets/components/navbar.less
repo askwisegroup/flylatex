@@ -1,0 +1,727 @@
+//
+// Navbars
+// --------------------------------------------------
+
+// Wrapper and base class
+//
+// Provide a static navbar from which we expand to create full-width, fixed, and
+// other navbar variations.
+
+.navbar {
+  position: relative;
+  min-height: @navbar-height; // Ensure a navbar always shows (e.g., without a .navbar-brand in collapsed mode)
+  margin-bottom: @navbar-margin-bottom;
+  border-bottom: 1px solid transparent;
+
+  // Prevent floats from breaking the navbar
+  &:extend(.clearfix all);
+
+  @media (min-width: @grid-float-breakpoint) {
+    border-radius: @navbar-border-radius;
+  }
+}
+
+// Navbar heading
+//
+// Groups `.navbar-brand` and `.navbar-toggle` into a single component for easy
+// styling of responsive aspects.
+
+.navbar-header {
+  &:extend(.clearfix all);
+
+  @media (min-width: @grid-float-breakpoint) {
+    float: left;
+  }
+}
+
+// Navbar collapse (body)
+//
+// Group your navbar content into this for easy collapsing and expanding across
+// various device sizes. By default, this content is collapsed when <768px, but
+// will expand past that for a horizontal display.
+//
+// To start (on mobile devices) the navbar links, forms, and buttons are stacked
+// vertically and include a `max-height` to overflow in case you have too much
+// content for the user's viewport.
+
+.navbar-collapse {
+  overflow-x: visible;
+  padding-right: @navbar-padding-horizontal;
+  padding-left: @navbar-padding-horizontal;
+  &:extend(.clearfix all);
+  -webkit-overflow-scrolling: touch;
+  height: 100vh;
+
+  &.in {
+    overflow-y: auto;
+  }
+
+  @media (min-width: @grid-float-breakpoint) {
+    width: auto;
+    border-top: 0;
+    box-shadow: none;
+
+    &.collapse {
+      display: block !important;
+      height: auto !important;
+      padding-bottom: 0; // Override default setting
+      overflow: visible !important;
+    }
+
+    &.in {
+      overflow-y: visible;
+    }
+
+    // Undo the collapse side padding for navbars with containers to ensure
+    // alignment of right-aligned contents.
+    .navbar-fixed-top &,
+    .navbar-static-top &,
+    .navbar-fixed-bottom & {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+}
+
+.navbar-main {
+  z-index: @z-index-navbar;
+  .container-fluid > .navbar-collapse {
+    // High specificity needed to override Bootstrap's default.
+    margin: 10px 0 0;
+    @media (min-width: @grid-float-breakpoint) {
+      margin: 0;
+    }
+  }
+  .navbar-collapse {
+    // Use absolute positioning to build the hamburger menu.
+    position: absolute;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    background-color: @navbar-default-bg;
+    border-bottom: solid 1px @navbar-default-border;
+    padding: 0;
+
+    @media (min-width: @grid-float-breakpoint) {
+      // Get back to regular layout mode as soon as the menu items are
+      // expanded (i.e. not contained within the hamburguer menu).
+      position: static;
+      background-color: transparent;
+      border-bottom: 0;
+      padding-right: @navbar-padding-horizontal;
+      padding-left: @navbar-padding-horizontal;
+    }
+
+    // FIXED: 2026-11-11 移动端汉堡菜单要「弹出」，不要「铺开」。
+    //
+    // 改之前：菜单继承 .navbar-collapse 的 height:100vh，再加上这里上面的
+    // left:0 / width:100% → 点开是一整块占满视口宽高、底色不透明的面板，
+    // 看起来像导航栏把整页顶开/盖住，而不是一个浮在右上角的下拉卡片。
+    //
+    // 改之后：尺寸由内容决定（height:auto + max-height），锚在顶栏右下方，
+    // 圆角 + 边框 + 阴影，内容超长时面板自己滚动（不影响页面布局）。
+    // 只在折叠区间（< @grid-float-breakpoint，即 <992px）生效，桌面端零影响。
+    @media (max-width: @grid-float-breakpoint-max) {
+      position: absolute;
+      top: 100%;
+      left: auto;
+      right: 8px;
+      width: 280px;
+      max-width: calc(100vw - 16px);
+      height: auto;
+      max-height: calc(100vh - 72px);
+      overflow-y: auto;
+      border: 1px solid @navbar-default-border;
+      border-radius: 10px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+      padding: 4px 0;
+    }
+  }
+}
+// Both navbar header and collapse
+//
+// When a container is present, change the behavior of the header and collapse.
+
+.container,
+.container-fluid {
+  > .navbar-header,
+  > .navbar-collapse {
+    margin-right: -@navbar-padding-horizontal;
+    margin-left: -@navbar-padding-horizontal;
+
+    @media (min-width: @grid-float-breakpoint) {
+      margin-right: 0;
+      margin-left: 0;
+    }
+  }
+}
+
+//
+// Navbar alignment options
+//
+// Display the navbar across the entirety of the page or fixed it to the top or
+// bottom of the page.
+
+// Static top (unfixed, but 100% wide) navbar
+.navbar-static-top {
+  z-index: @zindex-navbar;
+  border-width: 0 0 1px;
+
+  @media (min-width: @grid-float-breakpoint) {
+    border-radius: 0;
+  }
+}
+
+// Fix the top/bottom navbars when screen real estate supports it
+.navbar-fixed-top,
+.navbar-fixed-bottom {
+  position: fixed;
+  right: 0;
+  left: 0;
+  z-index: @zindex-navbar-fixed;
+
+  // Undo the rounded corners
+  @media (min-width: @grid-float-breakpoint) {
+    border-radius: 0;
+  }
+}
+.navbar-fixed-top {
+  top: 0;
+  border-width: 0 0 1px;
+}
+.navbar-fixed-bottom {
+  bottom: 0;
+  margin-bottom: 0; // override .navbar defaults
+  border-width: 1px 0 0;
+}
+
+// Brand/project name
+
+.navbar-brand {
+  float: left;
+  //padding: @navbar-padding-vertical @navbar-padding-horizontal;
+  //font-size: @font-size-large;
+  line-height: @line-height-computed;
+  //height: @navbar-height;
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
+
+  // @media (min-width: @grid-float-breakpoint) {
+  //   .navbar > .container &,
+  //   .navbar > .container-fluid & {
+  //     margin-left: -@navbar-padding-horizontal;
+  //   }
+  // }
+}
+
+.navbar-title {
+  font-size: 20px;
+  display: inline-block;
+  margin-top: 2px;
+  color: @navbar-title-color;
+  &:hover,
+  &:active,
+  &:focus {
+    color: @navbar-title-color-hover;
+    text-decoration: none;
+  }
+}
+
+// Navbar toggle
+//
+// Custom button for toggling the `.navbar-collapse`, powered by the collapse
+// JavaScript plugin.
+
+.navbar-toggle {
+  position: relative;
+  float: right;
+  padding: 3px 10px 0px;
+  background-color: transparent;
+  background-image: none; // Reset unusual Firefox-on-Android default style; see https://github.com/necolas/normalize.css/issues/214
+  border: 0;
+  border-radius: @border-radius-base;
+
+  .fa {
+    font-size: @navbar-height / 2;
+  }
+
+  // We remove the `outline` here, but later compensate by attaching `:hover`
+  // styles to `:focus`.
+  &:focus {
+    outline: none;
+  }
+
+  @media (min-width: @grid-float-breakpoint) {
+    display: none;
+  }
+}
+
+// Navbar nav links
+//
+// Builds on top of the `.nav` components with its own modifier class to make
+// the nav the full height of the horizontal nav (above 768px).
+
+.navbar-nav {
+  margin: (@navbar-padding-vertical / 2) -@navbar-padding-horizontal;
+
+  > li > a {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    line-height: @line-height-computed;
+  }
+
+  @media (max-width: @grid-float-breakpoint-max) {
+    margin: (@navbar-padding-vertical / 2) 0;
+    // Dropdowns get custom display when collapsed
+    .open .dropdown-menu {
+      position: static;
+      float: none;
+      width: auto;
+      margin-top: 0;
+      background-color: transparent;
+      border: 0;
+      box-shadow: none;
+      > li > a,
+      > li > div.subdued,
+      > li > form > button,
+      .dropdown-header {
+        padding: 5px 15px 5px 25px;
+      }
+      > li > a,
+      > li > form > button {
+        line-height: @line-height-computed;
+        &:hover,
+        &:focus {
+          background-image: none;
+        }
+      }
+      > li > div.subdued {
+        line-height: @line-height-computed;
+      }
+    }
+  }
+
+  // Uncollapse the nav
+  @media (min-width: @grid-float-breakpoint) {
+    float: left;
+    margin: 0;
+
+    > li {
+      float: left;
+      > a {
+        padding-top: @navbar-padding-vertical;
+        padding-bottom: @navbar-padding-vertical;
+      }
+    }
+
+    &.navbar-right:last-child {
+      margin-right: -@navbar-padding-horizontal;
+    }
+  }
+}
+
+// Component alignment
+//
+// Repurpose the pull utilities as their own navbar utilities to avoid specificity
+// issues with parents and chaining. Only do this when the navbar is uncollapsed
+// though so that navbar contents properly stack and align in mobile.
+
+@media (min-width: @grid-float-breakpoint) {
+  .navbar-left {
+    .pull-left();
+  }
+  .navbar-right {
+    .pull-right();
+  }
+}
+
+// Navbar form
+//
+// Extension of the `.form-inline` with some extra flavor for optimum display in
+// our navbars.
+
+.navbar-form {
+  margin-left: -@navbar-padding-horizontal;
+  margin-right: -@navbar-padding-horizontal;
+  padding: 10px @navbar-padding-horizontal;
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+  @shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 1px 0 rgba(255, 255, 255, 0.1);
+  .box-shadow(@shadow);
+
+  // Mixin behavior for optimum display
+  .form-inline();
+
+  .form-group {
+    @media (max-width: @grid-float-breakpoint-max) {
+      margin-bottom: 5px;
+    }
+  }
+
+  // Vertically center in expanded, horizontal navbar
+  .navbar-vertical-align(@input-height-base);
+
+  // Undo 100% width for pull classes
+  @media (min-width: @grid-float-breakpoint) {
+    width: auto;
+    border: 0;
+    margin-left: 0;
+    margin-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    .box-shadow(none);
+
+    // Outdent the form if last child to line up with content down the page
+    &.navbar-right:last-child {
+      margin-right: -@navbar-padding-horizontal;
+    }
+  }
+}
+
+// Dropdown menus
+
+// Menu position and menu carets
+.navbar-nav > li > .dropdown-menu {
+  margin-top: 0;
+  .border-top-radius(0);
+}
+// Menu position and menu caret support for dropups via extra dropup class
+.navbar-fixed-bottom .navbar-nav > li > .dropdown-menu {
+  .border-bottom-radius(0);
+}
+
+// Buttons in navbars
+//
+// Vertically center a button within a navbar (when *not* in a form).
+
+.navbar-btn {
+  .navbar-vertical-align(@input-height-base);
+
+  &.btn-sm {
+    .navbar-vertical-align(@input-height-small);
+  }
+  &.btn-xs {
+    .navbar-vertical-align(22);
+  }
+}
+
+// Text in navbars
+//
+// Add a class to make any element properly align itself vertically within the navbars.
+
+.navbar-text {
+  .navbar-vertical-align(@line-height-computed);
+
+  @media (min-width: @grid-float-breakpoint) {
+    float: left;
+    margin-left: @navbar-padding-horizontal;
+    margin-right: @navbar-padding-horizontal;
+
+    // Outdent the form if last child to line up with content down the page
+    &.navbar-right:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+// Alternate navbars
+// --------------------------------------------------
+
+// Default navbar
+.navbar-default {
+  // FIXED: 2026-10-29 渐变写死导致浅色/柔和主题的顶栏永远是品牌紫蓝
+  background-image: @fl-navbar-gradient;
+  background-color: @navbar-default-bg;
+  border-color: @navbar-default-border;
+  padding: @navbar-default-padding;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: @header-height;
+
+  .navbar-brand {
+    position: absolute;
+    top: 5px;
+    bottom: 5px;
+    width: @navbar-brand-width;
+    padding: 0;
+    background-image: @navbar-brand-image-url;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: left center;
+  }
+
+  .navbar-text {
+    color: @navbar-default-color;
+  }
+
+  .navbar-nav {
+    > li > a {
+      color: @navbar-default-link-color;
+      border: 2px solid transparent;
+      font-size: @navbar-btn-font-size;
+      font-weight: @navbar-btn-font-weight;
+      line-height: @navbar-btn-line-height;
+      background-color: @navbar-default-link-bg;
+
+      @media (min-width: @grid-float-breakpoint) {
+        border-radius: @navbar-btn-border-radius;
+        padding: @navbar-btn-padding;
+      }
+
+      &:hover,
+      &:focus {
+        color: #fff;
+        background-color: @navbar-default-link-hover-bg;
+        border: 2px solid @navbar-default-link-hover-color;
+      }
+    }
+    > .active > a {
+      &,
+      &:hover,
+      &:focus {
+        color: @navbar-default-link-active-color;
+        background-color: @navbar-default-link-active-bg;
+      }
+    }
+    > .disabled > a {
+      &,
+      &:hover,
+      &:focus {
+        color: @navbar-default-link-disabled-color;
+        background-color: @navbar-default-link-disabled-bg;
+      }
+    }
+
+    > li.subdued > a {
+      border: 0;
+      color: @navbar-subdued-color;
+      margin-left: 0;
+      background-color: transparent;
+      &:hover,
+      &:focus {
+        color: @navbar-subdued-hover-color;
+        background-color: @navbar-subdued-hover-bg;
+      }
+      &:focus {
+        .tab-focus();
+      }
+      @media (min-width: @grid-float-breakpoint) {
+        padding: @navbar-subdued-padding;
+      }
+    }
+
+    @media (min-width: @grid-float-breakpoint) {
+      > li > a {
+        /* border-color: @navbar-default-link-border-color; */
+        margin-left: 1rem;
+      }
+    }
+  }
+
+  .navbar-toggle {
+    border-color: @navbar-default-toggle-border-color;
+    // FIXED: 2026-11-10 移动端 /project 顶栏的汉堡按钮：原来直接用 @navbar-default-link-color
+    // （#fff，是配深色顶栏的），浅色/柔和主题下顶栏是白/米色，图标几乎看不见，也没跟上主色。
+    // 现在改为可覆盖的 @navbar-default-toggle-color，亮色/柔和主题里指向主色。
+    // OLD: color: @navbar-default-link-color;
+    color: @navbar-default-toggle-color;
+    &:hover,
+    &.active {
+      background-color: @navbar-default-toggle-hover-bg;
+      border-color: @navbar-default-toggle-hover-bg;
+      color: #fff;
+    }
+  }
+
+  .navbar-collapse,
+  .navbar-form {
+    border-color: @navbar-default-border;
+  }
+
+  .navbar-collapse.in {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.25);
+  }
+  // Dropdown menu items
+  .navbar-nav {
+    // Remove background color from open dropdown
+    > .open > a {
+      &,
+      &:hover,
+      &:focus {
+        background-color: @navbar-default-link-active-bg;
+        color: @navbar-default-link-active-color;
+      }
+    }
+
+    > .open.subdued > a {
+      &,
+      &:hover,
+      &:focus {
+        color: @navbar-subdued-hover-color;
+        background-color: @navbar-subdued-hover-bg;
+      }
+    }
+
+    @media (max-width: @grid-float-breakpoint-max) {
+      // Dropdowns get custom display when collapsed
+      .open .dropdown-menu {
+        background-color: lighten(@navbar-default-bg, 10%);
+        // FIXED: 2026-10-29 这里原来用 @navbar-default-link-color（白，配彩色胶囊用的），
+        // 但下拉底色是顶栏底色 lighten 出来的浅色 —— 深色顶栏下没事，
+        // 浅色/柔和主题就变成白底白字。改用 @navbar-default-color（深色顶栏下同为 #fff，不变）。
+        > li > div.subdued {
+          color: mix(@navbar-default-color, @navbar-default-bg);
+        }
+        > li > a,
+        > li > form > button {
+          // padding: 12px 12px 13px 30px;
+          color: @navbar-default-color;
+          &:hover,
+          &:focus {
+            color: #fff;
+            background-color: @navbar-default-link-hover-bg;
+          }
+        }
+        > .active > a,
+        > .active > form > button {
+          &,
+          &:hover,
+          &:focus {
+            color: @navbar-default-link-active-color;
+            background-color: @navbar-default-link-active-bg;
+          }
+        }
+        > .disabled > a,
+        > .disabled > form > button {
+          &,
+          &:hover,
+          &:focus {
+            color: @navbar-default-link-disabled-color;
+            background-color: @navbar-default-link-disabled-bg;
+          }
+        }
+      }
+    }
+  }
+
+  // Links in navbars
+  //
+  // Add a class to ensure links outside the navbar nav are colored correctly.
+
+  .navbar-link {
+    color: @navbar-default-link-color;
+    &:hover {
+      color: @navbar-default-link-hover-color;
+    }
+  }
+
+  @media (min-width: @grid-float-breakpoint) {
+    padding: @navbar-default-padding-v 0;
+  }
+}
+
+// Accessibility
+.skip-to-content {
+  color: @navbar-default-link-color;
+  background-color: @navbar-default-link-bg;
+  border: 2px solid transparent;
+  border-radius: @navbar-btn-border-radius;
+  font-size: @navbar-btn-font-size;
+  font-weight: @navbar-btn-font-weight;
+  left: @navbar-brand-width + @padding-lg;
+  line-height: @navbar-btn-line-height;
+  padding: @navbar-btn-padding;
+  position: absolute;
+  top: -200px;
+  z-index: @zindex-navbar + 1;
+
+  &:focus {
+    background-color: @navbar-default-link-hover-bg;
+    border: 2px solid @navbar-default-link-hover-color;
+    color: @white;
+    text-decoration: none;
+    top: @navbar-default-padding-v;
+  }
+}
+
+// FIXED: 2026-11-05 导航栏「全局主题」快捷切换（default / light / soft）
+.navbar-main {
+  .overall-theme-picker {
+    .overall-theme-picker-label {
+      margin-left: 5px;
+    }
+
+    // 当前主题打勾；非当前项保留位置但隐藏，避免文字跳动
+    .overall-theme-picker-check {
+      float: right;
+      margin-top: 2px;
+      margin-left: 12px;
+      visibility: hidden;
+    }
+
+    .overall-theme-picker-option.active .overall-theme-picker-check {
+      visibility: visible;
+    }
+
+    .dropdown-menu {
+      min-width: 170px;
+    }
+  }
+}
+
+// FIXED: 2026-11-11 移动端折叠菜单里的导航项要「平铺」，不能每条都像被选中。
+//
+// 根因在主题变量而不是几何：
+//   light/soft 主题里 @navbar-default-link-bg 被设成主色（@green），和
+//   @navbar-default-link-active-bg 完全一样。桌面端白底顶栏靠这块绿底让白色
+//   链接文字可读，是有意为之；但折叠菜单里每条 a 都带这个背景，于是
+//   「普通项」和「当前项」长得一模一样 —— 打开菜单看着像所有项都被选中。
+//   之前面板是满视口宽的不透明色块，色条看着像分区行；现在收进浮层卡片，
+//   绿胶囊的观感就被放大了。
+//
+// 做法：折叠区间内普通项改成透明底 + 与卡片底色配对的正文色
+//   （@navbar-default-color 在 light = @neutral-70、soft = #3d3a34、
+//    default 深色 = #fff，正好都是「该主题下顶栏文字色」），
+//   只有真·当前页（.active）和已展开（.open）才是主色实心。
+// 只在 < @grid-float-breakpoint（992px）生效，桌面端零影响。
+@media (max-width: @grid-float-breakpoint-max) {
+  .navbar-main .navbar-collapse .navbar-nav {
+    > li > a {
+      margin-right: 6px;
+      margin-left: 6px;
+      border-radius: 6px;
+      border-color: transparent;
+      background-color: transparent;
+      color: @navbar-default-color;
+    }
+
+    > li > a:hover,
+    > li > a:focus {
+      background-color: @navbar-subdued-hover-bg;
+      border-color: transparent;
+      color: @navbar-subdued-hover-color;
+    }
+
+    // 次要项（帮助/关于之类）保持更淡的文字色，别被上面那条规则拉平成普通项
+    > li.subdued > a {
+      background-color: transparent;
+      color: @navbar-subdued-color;
+    }
+
+    > li.active > a,
+    > li.open > a,
+    > li.active > a:hover,
+    > li.open > a:hover,
+    > li.active > a:focus,
+    > li.open > a:focus {
+      background-color: @navbar-default-link-active-bg;
+      border-color: transparent;
+      color: @navbar-default-link-active-color;
+    }
+  }
+}

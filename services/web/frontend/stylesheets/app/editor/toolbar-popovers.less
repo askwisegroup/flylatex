@@ -1,0 +1,167 @@
+// FIXED: 2026-11-16 工具栏下拉（表格 / 章节标题 / 插入图片 / 数学 / 更多）的样式。
+//
+// 为什么从 CM theme 搬到这里：这些下拉现在 portal 到 document.body
+// （见 toolbar/*-dropdown.tsx 的 container={document.body}），
+// 目的是不被「编辑器 pane 的 stacking context」困住 —— 否则右下角那两个
+// synctex 圆按钮（在 .ui-layout-resizer 里、DOM 靠后）会盖住弹层。
+//
+// 代价是 CM 的 EditorView.theme（作用域在 .cm-editor 内）不再作用于它们，
+// 所以背景/边框/列表项这些**弹层外观**必须落在全局 LESS 里；
+// 颜色仍然全部走主题变量，四个主题照旧各自取色。
+
+// ---- 工具栏「更多」（溢出）弹层 ----
+#popover-toolbar-overflow {
+  padding: 0;
+  border-color: fade(#7d7d7d, 20%);
+  background-color: var(--editor-toolbar-bg);
+  color: var(--toolbar-btn-color);
+
+  .popover-content {
+    padding: 0;
+  }
+
+  .arrow {
+    border-bottom-color: fade(#7d7d7d, 20%);
+
+    &::after {
+      border-bottom-color: var(--editor-toolbar-bg);
+    }
+  }
+}
+
+// ---- 通用「按钮 + 列表」下拉（图片 / 数学 / 章节）----
+.ol-cm-toolbar-button-menu-popover {
+  > .popover-content {
+    padding: 0;
+  }
+
+  .arrow {
+    display: none;
+  }
+
+  .list-group {
+    margin-bottom: 0;
+    background-color: var(--editor-toolbar-bg);
+  }
+
+  .list-group-item {
+    width: 100%;
+    text-align: start;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--toolbar-btn-color);
+    border-color: var(--editor-toolbar-bg);
+    background: none;
+
+    &:hover,
+    &:focus {
+      background-color: fade(#7d7d7d, 20%);
+    }
+  }
+}
+
+// ---- 「Normal text / 章节级别」下拉 ----
+.ol-cm-toolbar-menu-popover {
+  border: none;
+  border-radius: 0;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 2px 5px rgb(0 0 0 / 20%);
+  background-color: var(--editor-toolbar-bg);
+  color: var(--toolbar-btn-color);
+  padding: 0;
+
+  &.bottom {
+    margin-top: 1px;
+  }
+
+  &.top {
+    margin-bottom: 1px;
+  }
+
+  .arrow {
+    display: none;
+  }
+
+  .popover-content {
+    padding: 0;
+  }
+
+  .ol-cm-toolbar-menu {
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    font-size: 14px;
+  }
+
+  .ol-cm-toolbar-menu-item {
+    border: none;
+    background: none;
+    padding: 4px 12px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    color: inherit;
+
+    &.ol-cm-toolbar-menu-item-active {
+      background-color: fade(#7d7d7d, 10%);
+    }
+
+    &:hover {
+      background-color: fade(#7d7d7d, 20%);
+      color: inherit;
+    }
+
+    &.section-level-section {
+      font-size: 1.44em;
+    }
+
+    &.section-level-subsection {
+      font-size: 1.2em;
+    }
+
+    &.section-level-body {
+      font-weight: normal;
+    }
+  }
+}
+
+// ---- 插入表格的网格 ----
+.ol-cm-toolbar-table-grid-popover {
+  padding: 8px;
+  margin-left: 80px;
+  background-color: var(--editor-toolbar-bg);
+  // 关键：离开 .cm-editor 后不再继承工具栏前景色，
+  // 深色工具栏上会变成「深底深字」；这里显式跟随 token。
+  color: var(--toolbar-btn-color);
+}
+
+.ol-cm-toolbar-table-grid {
+  border-collapse: separate;
+  table-layout: fixed;
+  font-size: 6px;
+  cursor: pointer;
+  width: 160px;
+
+  td {
+    // 走 --fl-grid-* token（由工具栏前景色派生，四主题自动成立）
+    outline: 1px solid var(--fl-grid-line, rgba(125, 125, 125, 0.45));
+    outline-offset: -2px;
+    width: 16px;
+    height: 16px;
+
+    &.active {
+      outline-color: var(--fl-grid-line-strong, rgba(50, 101, 178, 0.9));
+      background: var(--fl-grid-cell-active-bg, rgba(125, 125, 125, 0.18));
+    }
+  }
+}
+
+.ol-cm-toolbar-table-size-label {
+  max-width: 160px;
+  font-family: Lato, sans-serif;
+  font-size: 12px;
+}

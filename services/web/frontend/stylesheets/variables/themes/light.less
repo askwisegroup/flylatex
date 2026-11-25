@@ -1,0 +1,161 @@
+// 外壳（chrome）：亮色主题下菜单栏/工具栏改为白底深字
+@fl-chrome-bg: #fff;
+@fl-chrome-border: #e4e8ee;
+@fl-chrome-text: #1b222c;
+@fl-chrome-text-muted: #5d6879;
+@fl-chrome-hover: #f4f5f8;
+@fl-primary-action-bg: #3e70bb;
+@fl-primary-action-hover: #2857a1;
+@fl-alert-success-bg: @ol-green; // FIXED: 2026-11-01 亮色调跟随主色
+// FIXED: 2026-11-02 AI 开关按钮激活态（跟主色）
+@fl-ai-toggle-active-bg: fade(@ol-green, 12%);
+@fl-ai-toggle-active-border: fade(@ol-green, 45%);
+@fl-ai-toggle-active-color: @ol-green;
+
+// Sidebar
+@sidebar-bg: #fff;
+@sidebar-color: @neutral-70;
+// FIXED: 2026-10-29 上游 @sidebar-link-color 是 #FFF（深色侧栏时代留下的），
+// 白底侧栏下整列菜单白字白底；标题/tag 菜单同病
+@sidebar-link-color: @neutral-70;
+@folders-title-color: @neutral-60;
+@folders-tag-menu-color: @neutral-70;
+@folders-tag-border-color: @neutral-20;
+@tag-color: @neutral-70;
+// 顶栏渐变在浅色主题下必须去掉，否则永远是一根品牌紫蓝条
+@fl-navbar-gradient: none;
+@sidebar-active-bg: @green;
+@sidebar-active-color: #fff;
+@sidebar-hover-bg: @neutral-20;
+@sidebar-active-font-weight: normal;
+@sidebar-hover-text-decoration: none;
+
+@v2-dash-pane-bg: @neutral-20;
+@v2-dash-pane-link-color: @blue;
+@v2-dash-pane-toggle-color: @neutral-70;
+@v2-dash-pane-btn-bg: @neutral-80;
+@v2-dash-pane-btn-hover-bg: @neutral-90;
+@v2-dash-pane-color: @neutral-70;
+
+@progress-bar-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+@progress-bg: @neutral-10;
+
+@input-border: @neutral-20;
+
+// Editor file-tree
+// FIXED: 2026-11-08 图标原来用 @neutral-40(#afb5c0)，在 #fff 上对比度只有 2.6:1，
+// 文件/文件夹图标几乎看不清。换成 @neutral-60(#677283)，对比度 ~4.9:1。
+// OLD: @file-tree-item-toggle-color: @neutral-40; … @file-tree-item-icon-color: @neutral-40;
+@file-tree-bg: #fff;
+@file-tree-line-height: 2.05;
+@file-tree-item-color: @neutral-70;
+@file-tree-item-focus-color: @file-tree-item-color;
+@file-tree-item-selected-color: #fff;
+@file-tree-item-toggle-color: @neutral-60;
+@file-tree-item-icon-color: @neutral-60;
+@file-tree-item-folder-color: @neutral-60;
+@file-tree-item-hover-bg: @neutral-20;
+@file-tree-item-selected-bg: @green;
+@file-tree-multiselect-bg: @blue;
+@file-tree-multiselect-hover-bg: @blue-dark;
+@file-tree-droppable-bg-color: @neutral-50;
+// FIXED: 2026-11-08 大纲展开/折叠箭头（原来 @neutral-40 在白底只有 2.6:1）
+@outline-expand-collapse-color: @neutral-60;
+
+@content-alt-bg-color: @neutral-10;
+
+// File outline
+@outline-line-guide-color: @neutral-20;
+@outline-header-hover-bg: @file-tree-item-hover-bg;
+@outline-highlight-bg: mix(@file-tree-bg, @neutral-20);
+
+@vertical-resizable-resizer-bg: @neutral-20;
+@vertical-resizable-resizer-hover-bg: @file-tree-item-hover-bg;
+
+// Editor resizers
+@editor-resizer-bg-color: @neutral-20;
+@editor-resizer-bg-color-dragging: @neutral-20;
+// FIXED: 2026-10-29 浅底 + 白箭头对比度太低
+@editor-toggler-bg-color: @neutral-70;
+@editor-toggler-hover-bg-color: @green;
+@synctex-controls-z-index: 6;
+@synctex-controls-padding: 0;
+@editor-border-color: @neutral-20;
+
+@toolbar-border-color: @neutral-20;
+@toolbar-alt-bg-color: #fff;
+@editor-toolbar-bg: @toolbar-alt-bg-color;
+
+@toolbar-header-bg-color: #fff;
+@toolbar-header-btn-border-color: @neutral-20;
+@toolbar-btn-color: @neutral-70;
+@toolbar-btn-hover-color: @neutral-70;
+@toolbar-btn-hover-bg-color: @neutral-10;
+@toolbar-icon-btn-color: @neutral-70;
+@toolbar-icon-btn-hover-color: @neutral-70;
+@editor-header-logo-background: url(../../../../public/img/ol-brand/overleaf-o.svg)
+  center / contain no-repeat;
+@project-name-color: @neutral-70;
+@project-rename-link-color: @neutral-70;
+@project-rename-link-color-hover: @neutral-70;
+@logs-pane-bg: @neutral-10;
+
+// Navbar
+@navbar-default-bg: #fff;
+@navbar-default-border: @neutral-20;
+@navbar-default-link-bg: @green;
+@navbar-default-link-color: #fff;
+@navbar-default-link-border-color: transparent;
+@navbar-default-link-hover-bg: @green;
+@navbar-default-link-active-bg: @green;
+@navbar-default-link-hover-color: @green;
+// FIXED: 2026-11-10 同旧体系：移动端汉堡按钮用主色（柔和主题里 @green 已被换成陶土橙）
+@navbar-default-toggle-color: @green;
+
+// FIXED: 2026-10-29 同旧体系：白底顶栏下字标原来是近白色
+@navbar-title-color: @neutral-70;
+@navbar-title-color-hover: @neutral-90;
+@navbar-default-color: @neutral-70;
+@navbar-brand-image-url: url(../../../../public/img/ol-brand/overleaf.svg);
+
+@navbar-subdued-color: @neutral-70;
+@navbar-subdued-hover-bg: @neutral-20;
+@navbar-subdued-hover-color: @neutral-70;
+
+// v2 History
+@history-toolbar-color: @neutral-70;
+@history-base-bg: @neutral-10;
+@history-file-badge-bg: rgba(0, 0, 0, 0.25);
+@history-file-badge-color: #fff;
+
+// Formatting buttons
+@formatting-btn-color: @toolbar-icon-btn-color;
+@formatting-btn-bg: transparent;
+@formatting-btn-border: @neutral-20;
+@formatting-menu-bg: #fff;
+
+// Chat
+@chat-bg: #fff;
+@chat-instructions-color: @neutral-70;
+@chat-message-color: #fff;
+@chat-message-name-color: @neutral-70;
+@chat-message-date-color: @neutral-70;
+@chat-new-message-bg: @neutral-10;
+@chat-new-message-textarea-bg: #fff;
+@chat-new-message-textarea-color: @neutral-90;
+@chat-new-message-border-color: @neutral-20;
+
+// Symbol Palette
+@symbol-palette-bg: #fff;
+@symbol-palette-color: @neutral-70;
+@symbol-palette-header-background: @neutral-20;
+@symbol-palette-item-bg: @neutral-20;
+@symbol-palette-item-color: @neutral-70;
+@symbol-palette-selected-tab-bg: #fff;
+@symbol-palette-selected-tab-color: @blue;
+@symbol-palette-text-shadow-color: @neutral-20;
+
+// React History
+@history-react-header-bg: #fff;
+@history-react-header-color: @ol-blue-gray-3;
+@history-react-separator-color: @neutral-20;

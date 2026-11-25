@@ -1,0 +1,41 @@
+extends ../../layout
+
+//- FIXED: 2026-11-14 分享链接已关闭 / 失效时的友好页面。
+//- 原来这种情况直接 404，用户只看到 "Project not found"，
+//- 分不清是链接被关了还是自己敲错了。
+block vars
+	- var suppressFooter = true
+	- var suppressCookieBanner = true
+	- var suppressSkipToContent = true
+
+block content
+	style.
+		.link-closed {
+			max-width: 640px;
+			margin: 0 auto;
+			padding: 8rem 1rem 6rem;
+			text-align: center;
+		}
+		.link-closed__icon {
+			font-size: 3rem;
+			color: #c7ccd4;
+			margin-bottom: 1.5rem;
+		}
+		.link-closed__title {
+			font-size: 1.75rem;
+			margin-bottom: 1rem;
+			color: #2c3440;
+		}
+		.link-closed__message {
+			font-size: 1.05rem;
+			line-height: 1.8;
+			color: #5f6b7a;
+			margin-bottom: 2rem;
+		}
+
+	.container.link-closed
+		.link-closed__icon
+			i.fa.fa-link(aria-hidden="true")
+		h1.link-closed__title #{translate('link_sharing_closed_title')}
+		p.link-closed__message #{translate('link_sharing_closed_message')}
+		a.btn.btn-primary.link-closed__action(href="/project") #{translate('back_to_your_projects')}

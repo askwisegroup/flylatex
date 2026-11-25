@@ -1,0 +1,231 @@
+// FIXED: 2026-11-16 编辑器多文件页签（路线 B：轻量自研）
+//
+// 挂在 CodeMirror 的 top panel 里（见 extensions/editor-tabs-panel.ts），
+// 所以颜色沿用编辑器既有的两个变量，三个主题（浅色/柔和/IEEE）各自取色；
+// 激活态的强调色用 @btn-primary-bg（本项目动作色的唯一来源），不写死颜色。
+
+.ol-cm-editor-tabs-portal {
+  // 只有 1 个页签时 React 渲染 null，panel 的 dom 是空的 → 不再占高度
+  &:empty {
+    display: none;
+  }
+}
+
+.ol-cm-editor-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  // FIXED: 2026-11-16 反馈「页签条太高、不够扁平」：34px → 26px，
+  // 同时收窄左右内边距与圆角。26px 仍是可点区域（≥24px），不影响触控。
+  height: 26px;
+  padding: 0 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background-color: var(--editor-toolbar-bg, #fff);
+  color: var(--toolbar-btn-color, #333);
+  border-bottom: 1px solid rgba(125, 125, 125, 0.16);
+  scrollbar-width: thin;
+
+  &::-webkit-scrollbar {
+    height: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(125, 125, 125, 0.3);
+    border-radius: 2px;
+  }
+}
+
+.ol-cm-editor-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 auto;
+  max-width: 220px;
+  padding: 0 2px 0 8px;
+  font-size: 12px;
+  line-height: 1;
+  border-bottom: 2px solid transparent;
+  border-radius: 4px 4px 0 0;
+  color: inherit;
+  opacity: 0.72;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+
+  &:hover {
+    opacity: 1;
+    background: rgba(125, 125, 125, 0.08);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2px var(--fl-focus-ring, rgba(26, 115, 232, 0.4));
+  }
+
+  &-active {
+    opacity: 1;
+    border-bottom-color: @btn-primary-bg;
+    background: rgba(125, 125, 125, 0.06);
+  }
+
+  &-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &-close {
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    font-size: 12px;
+    line-height: 12px;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.12s ease, background 0.12s ease;
+
+    &:hover {
+      background: rgba(125, 125, 125, 0.2);
+    }
+  }
+
+  &:hover &-close,
+  &-active &-close {
+    opacity: 0.65;
+  }
+
+  & &-close:hover {
+    opacity: 1;
+  }
+}
+
+// 右端的「收起页签栏」按钮。
+// FIXED: 2026-11-16 原来是一个「»」图标，被误认为「更多」；现在改成带文字的胶囊「收起」，
+// 并在点击时弹一句 toast 说明怎么重新打开。
+.ol-cm-editor-tabs-hide {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  position: sticky;
+  right: 0;
+  flex: 0 0 auto;
+  align-self: center;
+  width: auto;
+  height: 18px;
+  margin-left: auto;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: inherit;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+  white-space: nowrap;
+  opacity: 0.55;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 1;
+    background: rgba(125, 125, 125, 0.18);
+  }
+}
+
+// 移动端有自己的一套编辑器顶栏（Code/PDF 切换），这里不叠加
+@media (max-width: @screen-xs-max) {
+  .ol-cm-editor-tabs-portal {
+    display: none;
+  }
+}
+
+// 「收起」前面的小箭头，让人一眼看出是「向上收起」而不是「更多」
+.ol-cm-editor-tabs-hide-icon {
+  font-size: 10px;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+// FIXED: 2026-11-16 收起页签栏前的确认框（portal 到 body）
+.fl-editor-tabs-confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20050; // 高于命令面板（20000）、符号面板，低于全局错误弹窗
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.24);
+}
+
+// 覆盖整块遮罩的透明按钮（点它 = 取消），键盘也能聚焦
+.fl-editor-tabs-confirm-mask {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+
+.fl-editor-tabs-confirm {
+  position: relative;
+  box-sizing: border-box;
+  width: ~'min(420px, 92vw)';
+  padding: 16px 18px 14px;
+  background: var(--fl-surface, #fff);
+  color: var(--fl-text, #1f2937);
+  border: 1px solid var(--fl-border, #d7dde6);
+  border-radius: 10px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.28);
+}
+
+.fl-editor-tabs-confirm-title {
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.fl-editor-tabs-confirm-body {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--fl-text-muted, #6b7785);
+
+  strong {
+    color: var(--fl-text, #1f2937);
+    font-weight: 600;
+  }
+}
+
+.fl-editor-tabs-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.fl-editor-tabs-confirm-cancel,
+.fl-editor-tabs-confirm-ok {
+  padding: 4px 14px;
+  font-size: 13px;
+  line-height: 20px;
+  border-radius: @border-radius-base;
+  cursor: pointer;
+}
+
+.fl-editor-tabs-confirm-cancel {
+  color: var(--fl-text-muted, #6b7785);
+  background: transparent;
+  border: 1px solid var(--fl-border, #d7dde6);
+}
+
+.fl-editor-tabs-confirm-ok {
+  color: #fff;
+  background: @btn-primary-bg;
+  border: 1px solid @btn-primary-bg;
+}

@@ -1,0 +1,123 @@
+// 主题：柔和色调（soft）—— 新版变量体系（design-system-updates 分流测试命中时使用）
+// 与 core/ol-soft-variables.less 的值保持一致，改动时请两边同步。
+@import 'light.less';
+
+@body-bg: #faf9f5;
+@text-color: #2c2c2a;
+
+@ol-blue: #c15f3c;
+@ol-dark-blue: #a94e2f;
+@link-color: #c15f3c;
+@link-hover-color: #a94e2f;
+@ol-green: #c15f3c;
+@ol-dark-green: #a94e2f;
+@ol-type-green: #c15f3c;
+
+@fl-chrome-bg: #efeadd;
+@fl-chrome-border: #e0d8c6;
+@fl-chrome-text: #141413;
+@fl-chrome-text-muted: #5e5d59;
+@fl-chrome-hover: #e6e0d1;
+
+@sidebar-bg: #f7f4ec;
+// ---- 文件树（新体系）：米色底上的暖色版本（与 core/ol-soft-variables.less 值一致）----
+// FIXED: 2026-11-08 名字用暖深灰，图标/文件夹/箭头用暖中灰，保证看得清
+@file-tree-bg: #f7f4ec;
+@file-tree-item-color: #35322c;
+@file-tree-item-icon-color: #8b8271;
+@file-tree-item-folder-color: #6b6456;
+@file-tree-item-toggle-color: #6b6456;
+@file-tree-item-hover-bg: #e6e0d1;
+@file-tree-droppable-bg-color: #b3a894;
+@outline-expand-collapse-color: #6b6456;
+// 侧栏文字：浅色主题的修复 + 换成暖灰
+@sidebar-color: #5b5548;
+@sidebar-link-color: #4a453c;
+@folders-title-color: #8f8878;
+@folders-tag-menu-color: #8f8878;
+@folders-tag-border-color: #e0d8c6;
+@tag-color: #4a453c;
+@fl-navbar-gradient: none;
+// 新版体系里 @green 就是"主色"（虽然叫 green，实际值是蓝 #3c64cf）。
+// 柔和主题必须把它一起换成陶土色，否则新版入口下的主按钮/链接还是蓝的。
+// 对应旧版体系的 @ol-green。
+@green: #c15f3c;
+@green-dark: #a94e2f;
+// 注意：底色一定要比弹窗底栏(#f5f2ea)亮，否则按钮和底栏同色，看起来像"透明"
+@fl-btn-secondary-bg: #fdfcf8;
+@fl-btn-secondary-color: #3d3a34;
+// FIXED: 2026-11-01 原来 #d8cebb 与弹窗内容底色(#fdfcf8) 太接近，次要按钮看起来像一行文字；
+// 描边加深一档，保证在柔和主题下能看出这是一个按钮
+@fl-btn-secondary-border: #c3b192;
+@fl-btn-secondary-hover-bg: #f0ebdf;
+// FIXED: 2026-11-02 AI 开关按钮激活态（跟主色）
+@fl-ai-toggle-active-bg: fade(@ol-green, 12%);
+@fl-ai-toggle-active-border: fade(@ol-green, 45%);
+@fl-ai-toggle-active-color: @ol-green;
+@editor-toggler-bg-color: #7d7568;
+@editor-resizer-bg-color: #e0d8c6;
+@editor-resizer-bg-color-dragging: #e0d8c6;
+// 项目列表侧栏拖拽条：跟外壳（header）同一个米色
+@project-list-resizer-bg: @fl-chrome-bg;
+@fl-synctex-control-bg: fade(#c15f3c, 88%);
+@fl-synctex-control-bg-disabled: fade(#7d7568, 65%);
+@fl-alert-success-bg: @ol-green; // FIXED: 2026-11-01 柔和色调跟随主色
+@navbar-title-color: #3d3a34;
+@navbar-title-color-hover: #141413;
+@file-tree-bg: #f7f4ec;
+@toolbar-alt-bg-color: #efeadd;
+@editor-toolbar-bg: @toolbar-alt-bg-color;
+@toolbar-header-bg-color: #efeadd;
+@chat-bg: #f7f4ec;
+@logs-pane-bg: #faf9f5;
+@symbol-palette-bg: #f7f4ec;
+@symbol-palette-header-background: #e6e0d1;
+@formatting-menu-bg: #f7f4ec;
+
+// AI 助手对话气泡：冷蓝/灰 换成 暖米/陶土
+@fl-bubble-user-bg: #f6e7dd;
+@fl-bubble-user-text: #a94e2f;
+@fl-bubble-assistant-bg: #f2efe7;
+@fl-bubble-assistant-text: #2c2c2a;
+// 主操作按钮：陶土橙
+@fl-primary-action-bg: #c15f3c;
+@fl-primary-action-hover: #a94e2f;
+
+// ---- 顶部外壳（全局导航条 + 编辑器工具栏）：暖色化 ----
+// 亮色主题里这些是纯白，柔和主题改成米色，否则页面暖、顶栏白，像两块拼接
+@navbar-default-bg: #efeadd;
+@navbar-default-border: #e0d8c6;
+@navbar-default-color: #3d3a34;
+@navbar-subdued-color: #5e5d59;
+@navbar-subdued-hover-bg: #e6e0d1;
+@navbar-subdued-hover-color: #141413;
+
+@toolbar-border-color: #e0d8c6;
+@toolbar-btn-color: #3d3a34;
+@toolbar-btn-hover-color: #141413;
+@toolbar-icon-btn-color: #3d3a34;
+@toolbar-icon-btn-hover-color: #141413;
+@project-name-color: #3d3a34;
+@project-rename-link-color: #5e5d59;
+
+// ---- 模态框（字数统计 / 快捷键 / 关于 / 重命名项目 / 搜索参考文献 …）----
+// 上游默认是纯白内容 + 冷灰页脚，套在暖色页面上像另一套 UI
+@modal-content-bg: #fdfcf8;
+@modal-content-border-color: rgba(90, 78, 60, 0.22);
+@modal-header-border-color: #e0d8c6;
+@modal-footer-background-color: #f5f2ea;
+
+// ---- 中性色阶里的"浅底"两档换成暖米（搜索面板底色/悬浮态/说明块）----
+@ol-blue-gray-0: #f7f4ec;
+@ol-blue-gray-1: #ece7dc;
+
+// ---- 表层与文字 token（TS 内联样式通过 var(--fl-*) 取用）----
+@fl-surface: #fdfcf8;
+@fl-surface-raised: #f5f2ea;
+@fl-border: #e0d8c6;
+@fl-text: #2c2c2a;
+@fl-text-muted: #6b6459;
+@fl-text-subtle: #8f8878;
+@fl-link: #a94e2f;
+@fl-link-bright: #c15f3c;
+@fl-kbd-bg: #3d3a34;

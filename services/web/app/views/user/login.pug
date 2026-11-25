@@ -1,0 +1,214 @@
+extends ../layout-marketing
+
+//- =========================================================================
+//- FIXED: 2026-11-12 登录页改为「按提供方注册表渲染」
+//-
+//- 原状：NE 密码 / NE 短信 / CARSI 三块直接写死在模板里，海外站要用 Google
+//-       登录就只能改这个 pug。而 pug 是产品升级的高频改动点，一旦分叉，
+//-       以后每次 master → sg 的 merge 都会在这里冲突。
+//-
+//- 现方案：模板只负责遍历 `loginProviders`（来自 Settings.loginProviders，
+//-         经 Features.enabledLoginProviders() 过滤排序后由控制器传入）。
+//-         各分支的表单标记与原来**逐字保持一致**，只是加了条件包裹，
+//-         因此中国站渲染结果不变（回归测试见 test/unit/src/IdentityProviders/）。
+//-
+//- FIXED: 2026-11-15 登录页视觉重做（方案 B）
+//-
+//- 三类登录方式按「是否离开本页」分开摆，不再混成一个控件：
+//-   1. 账号密码 / 短信验证码  → 同一张卡里换表单，用分段器（.fl-login__seg）
+//-   2. Google（sg，GIS 弹窗）→ 独立描边按钮，放在表单上方
+//-   3. CARSI（302 跳去学校 IdP）→ 表单下方，真分隔线 + 描边按钮 + 「将跳转」提示
+//-      只有 CARSI 一种登录方式时（纯机构部署）它才升为实心主按钮，
+//-      否则整页没有明确的主动作。
+//-
+//- 所有前端钩子逐字保留（#ne-login-form-pw / #ne-login-form-sms /
+//- [data-ol-ne-tab] / #ne-captcha-slot* / #ne-send-sms-code /
+//- data-ol-ne-password / data-ol-ne-captcha-field / data-ol-disabled-inflight）。
+//- 注意：ne-login-captcha.js 用 `classList.toggle('btn-primary')` 标记当前分段，
+//- 所以分段按钮的「选中态」在 CSS 里就是 .btn-primary 的那个分支，别改名。
+//- =========================================================================
+
+block content
+        - var providerIds = (loginProviders || []).map(function (p) { return p.id })
+        - var hasGoogle = providerIds.indexOf('google') !== -1
+        - var hasPassword = providerIds.indexOf('password') !== -1
+        - var hasSms = providerIds.indexOf('sms') !== -1
+        - var hasCarsi = providerIds.indexOf('carsi') !== -1
+        - var hasNeAccount = hasPassword || hasSms
+        //- 只有两种以上「原地换表单」的登录方式时，分段器才有意义
+        - var hasSegments = hasPassword && hasSms
+        //- CARSI 是唯一入口时它必须当主按钮，否则整页没有 primary action
+        - var carsiIsPrimary = hasCarsi && !hasNeAccount && !hasGoogle
+        //- 只要上面还有别的登录方式，CARSI 前面就得有分隔线
+        - var carsiNeedsDivider = hasCarsi && (hasNeAccount || hasGoogle)
+        main.content.content-alt#main-content
+                .container
+                        .row
+                                .col-xs-12.col-sm-8.col-sm-offset-2.col-md-6.col-md-offset-3.col-lg-4.col-lg-offset-4
+                                        .fl-login
+                                                .fl-login__card
+                                                        h1.fl-login__title #{translate("log_in")}
+                                                        if hasNeAccount
+                                                                p.fl-login__subtitle Account
+                                                        //- FIXED: 2026-10-11 认证 V2：前端状态提示文案（服务端渲染，避免前端 i18n 异步问题）
+                                                        if hasNeAccount
+                                                                #ne-login-i18n(
+                                                                        hidden,
+                                                                        data-ne-captcha-loading=translate("ne_captcha_loading"),
+                                                                        data-ne-captcha-pending=translate("ne_captcha_pending"),
+                                                                        data-ne-captcha-passed=translate("ne_captcha_passed"),
+                                                                        data-ne-captcha-failed=translate("ne_captcha_failed"),
+                                                                        data-ne-captcha-required=translate("ne_captcha_required"),
+                                                                        data-ne-captcha-unavailable=translate("ne_captcha_unavailable"),
+                                                                        data-ne-sms-code-sent=translate("ne_sms_code_sent"),
+                                                                        data-ne-sms-login-failed=translate("ne_sms_login_failed"),
+                                                                        data-ne-mobile-invalid=translate("ne_mobile_invalid"),
+                                                                        data-ne-password-encrypting=translate("ne_password_encrypting"),
+                                                                        data-ne-password-unavailable=translate("ne_password_unavailable"),
+                                                                        data-ne-password-retrying=translate("ne_password_retrying")
+                                                                )
+                                                        //- ------------------------------------------------------------------
+                                                        //- Google 登录（GIS 弹窗 → 后端验签 → 建立 Overleaf 会话）
+                                                        //- 前端实现在 frontend/js/features/google-login.js
+                                                        //- 弹窗不离开本页，但也不是「换表单」，所以放表单上方单独一块
+                                                        //- ------------------------------------------------------------------
+                                                        if hasGoogle
+                                                                .fl-login__google
+                                                                        #google-login(
+                                                                                data-google-client-id=googleClientId,
+                                                                                data-login-verify-url='/auth/google/verify'
+                                                                        )
+                                                                                .google-login-slot#google-login-button
+                                                                                #google-login-status.fl-login__status
+                                                        if hasGoogle && hasNeAccount
+                                                                .fl-login__divider
+                                                                        span.fl-login__divider-text #{translate("or")}
+                                                        //- ------------------------------------------------------------------
+                                                        //- 分段器：密码 / 短信。两个都是「原地换表单」，这才是页签该装的东西
+                                                        //- ------------------------------------------------------------------
+                                                        if hasNeAccount
+                                                                if hasSegments
+                                                                        .fl-login__seg(role="tablist", aria-label=translate("log_in"))
+                                                                                button.btn.btn-primary.fl-login__seg-btn(
+                                                                                        type="button",
+                                                                                        role="tab",
+                                                                                        aria-selected="true",
+                                                                                        data-ol-ne-tab="pw"
+                                                                                ) #{translate("ne_login_tab_password")}
+                                                                                button.btn.fl-login__seg-btn(
+                                                                                        type="button",
+                                                                                        role="tab",
+                                                                                        aria-selected="false",
+                                                                                        data-ol-ne-tab="sms"
+                                                                                ) #{translate("ne_login_tab_sms")}
+                                                        if hasPassword
+                                                                form#ne-login-form-pw(data-ol-async-form, name="loginForm", action='/login', method="POST")
+                                                                        input(name='_csrf', type='hidden', value=csrfToken)
+                                                                        //- FIXED: 2026-10-12 浏览器 SDK 只把密文写入提交字段；可见密码框不参与 FormData。
+                                                                        input(name='password', type='hidden', value='')
+                                                                        input(name='ne_password_encoding', type='hidden', value='ne-password-v1')
+                                                                        //- FIXED: 2026-10-11 认证 V2：人机验证结果（由前端验证码组件写入，未启用时为空）
+                                                                        input(name='captcha_verify_param', type='hidden', value='', data-ol-ne-captcha-field)
+                                                                        +formMessages()
+                                                                        .fl-login__field
+                                                                                label.fl-login__label(for="ne-login-email") 邮箱或手机号
+                                                                                input#ne-login-email.form-control.fl-login__input(
+                                                                                        type='text',
+                                                                                        name='email',
+                                                                                        required,
+                                                                                        autofocus="true",
+                                                                                        autocomplete='username',
+                                                                                        placeholder='邮箱 / 手机号'
+                                                                                )
+                                                                        .fl-login__field
+                                                                                .fl-login__label-row
+                                                                                        label.fl-login__label(for="ne-login-password") 密码
+                                                                                        a.fl-login__label-link(href="https://example.com/account-center/user/forget", target="_blank", rel="noopener") #{translate("forgot_your_password")}?
+                                                                                //- OLD: 可见密码框 name='password'（明文直接进入 FormData）
+                                                                                input#ne-login-password.form-control.fl-login__input(
+                                                                                        type='password',
+                                                                                        data-ol-ne-password,
+                                                                                        autocomplete='current-password',
+                                                                                        required,
+                                                                                        placeholder='请输入密码'
+                                                                                )
+                                                                                #ne-password-status.fl-login__status
+                                                                        //- FIXED: 2026-10-11 认证 V2：阿里云人机验证 2.0
+                                                                        //- 仅当字典 captcha.enabled="1" 时渲染组件；未通过前不提交登录请求
+                                                                        //- FIXED: 2026-11-15 人机验证可在 NE 账号中心关闭；关闭时这一整块由
+                                                                        //- ne-login-captcha.js 加上 hidden，不会留一个空槽位
+                                                                        .fl-login__field.fl-login__captcha(data-ol-ne-captcha)
+                                                                                #ne-captcha-slot.fl-login__captcha-slot
+                                                                                        #ne-captcha-holder
+                                                                                #ne-captcha-status.fl-login__status
+                                                                        .fl-login__actions
+                                                                                button.btn.btn-primary.btn-block.fl-login__submit(
+                                                                                        type='submit',
+                                                                                        disabled,
+                                                                                        data-ol-disabled-inflight
+                                                                                )
+                                                                                        span(data-ol-inflight="idle") #{translate("log_in")}
+                                                                                        span(hidden data-ol-inflight="pending") #{translate("logging_in")}…
+                                                        //- FIXED: 2026-10-11 认证 V2：短信验证码登录表单
+                                                        //- 用户匹配与密码登录同源（手机号作为标识），不会新建重复用户导致老文档丢失
+                                                        if hasSms
+                                                                form#ne-login-form-sms(data-ol-async-form, name="smsLoginForm", action='/login/sms', method="POST", hidden)
+                                                                        input(name='_csrf', type='hidden', value=csrfToken)
+                                                                        +formMessages()
+                                                                        .fl-login__field
+                                                                                label.fl-login__label(for="ne-login-mobile") #{translate("ne_mobile_number")}
+                                                                                .input-group.fl-login__group
+                                                                                        input#ne-login-mobile.form-control.fl-login__input(
+                                                                                                type='text',
+                                                                                                name='mobile',
+                                                                                                required,
+                                                                                                inputmode='numeric',
+                                                                                                autocomplete='tel',
+                                                                                                placeholder=translate("ne_mobile_number")
+                                                                                        )
+                                                                                        span.input-group-btn
+                                                                                                button.btn.fl-login__send(
+                                                                                                        type='button',
+                                                                                                        id='ne-send-sms-code'
+                                                                                                )
+                                                                                                        span(data-ol-inflight="idle") #{translate("ne_send_sms_code")}
+                                                                        //- 短信登录的人机验证：通过后才发送短信；短信码登录本身无需验证码字段
+                                                                        .fl-login__field.fl-login__captcha(data-ol-ne-captcha)
+                                                                                #ne-captcha-slot-sms.fl-login__captcha-slot
+                                                                                #ne-captcha-status-sms.fl-login__status
+                                                                        .fl-login__field
+                                                                                label.fl-login__label(for="ne-login-sms-code") #{translate("ne_sms_code")}
+                                                                                input#ne-login-sms-code.form-control.fl-login__input(
+                                                                                        type='text',
+                                                                                        name='code',
+                                                                                        required,
+                                                                                        inputmode='numeric',
+                                                                                        autocomplete='one-time-code',
+                                                                                        placeholder=translate("ne_sms_code")
+                                                                                )
+                                                                        .fl-login__actions
+                                                                                button.btn.btn-primary.btn-block.fl-login__submit(type='submit', data-ol-disabled-inflight)
+                                                                                        span(data-ol-inflight="idle") #{translate("ne_login_tab_sms")}
+                                                                                        span(hidden data-ol-inflight="pending") #{translate("logging_in")}…
+                                                        //- ------------------------------------------------------------------
+                                                        //- CARSI：302 跳去学校 IdP，不是「换表单」，所以放在表单下方单独一块，
+                                                        //- 用描边按钮 + 分隔线，避免和「登录」抢主色。
+                                                        //- FIXED: 2026-10-11 认证 V2：CARSI 入口改为「取字典 carsiauthorize + PKCE」
+                                                        //- （原实现是 V1 硬编码供应商地址 + state=oauth + resource_id，兼容期后必然失效）
+                                                        
+                                                        if hasCarsi
+                                                                if carsiNeedsDivider
+                                                                        .fl-login__divider
+                                                                                span.fl-login__divider-text #{translate("or")}
+                                                                .fl-login__sso
+                                                                        a.btn.btn-block.fl-login__sso-btn.btn-carsi(
+                                                                                href="/carsi",
+                                                                                class=carsiIsPrimary ? 'btn-primary' : ''
+                                                                        )
+                                                                                span #{translate("use_carsi_to_login")}
+                                                                        //- 跳转类登录必须提前说清楚「会离开本页」，否则点完一脸问号
+                                                                        p.fl-login__sso-hint 将跳转到学校统一身份认证页面（CARSI），登录后自动返回
+                                                        if hasNeAccount
+                                                                .fl-login__footer
+                                                                        span 还没有账号？
+                                                                        a.fl-login__footer-link(href="https://example.com/account-center", target="_blank", rel="noopener") Sign up for an account

@@ -1,0 +1,57 @@
+include ./left-menu-react
+
+#chat-wrapper.full-size(
+	layout="chat",
+	spacing-open="{{ui.chatResizerSizeOpen}}",
+	spacing-closed="{{ui.chatResizerSizeClosed}}",
+	ng-hide="state.loading",
+	ng-cloak
+)
+	.ui-layout-center
+		include ./header-react
+
+		if (!historyViewReact)
+			include ./history/toolbarV2.pug
+
+		main#ide-body(
+			ng-cloak,
+			role="main",
+			ng-class="{ 'ide-history-open' : (ui.view == 'history' && !history.isReact) }",
+			layout="main",
+			ng-hide="state.loading",
+			resize-on="layout:chat:resize,history:toggle,layout:flat-screen:toggle,south-pane-toggled",
+			minimum-restore-size-west="130"
+			custom-toggler-pane="west"
+			custom-toggler-msg-when-open=translate("tooltip_hide_filetree")
+		custom-toggler-msg-when-closed=translate("tooltip_show_filetree")
+		tabindex="0"
+			initial-size-east="250"
+			init-closed-east="true"
+			open-east="ui.chatOpen"
+		)
+			.ui-layout-west
+				include ./file-tree-react
+				if (historyViewReact)
+					include ./file-tree-history-react
+				else
+					include ./history/fileTreeV2
+
+			.ui-layout-center
+				include ./editor
+
+				if (historyViewReact)
+					history-root()
+				else
+					include ./history
+
+			if !isRestrictedTokenMember
+				.ui-layout-east
+					aside.chat
+						chat()
+
+	//- FIXED: 2026-11-10 移动端四档 Tab（文件 / 源码 / 预览 / AI 助手）。
+	//- 组件自己判断 viewport（<= 767px 才渲染），桌面端连 DOM 都不产生；
+	//- 位置在 #chat-wrapper 之外 —— 它是 jquery-layout 容器，里面的子元素会被当成 pane。
+	//- 必须挂在 .editor 里面，react2angular-shared-context 的 provider 在那一层。
+	.fl-mobile-tabs-host(ng-hide="state.loading")
+		mobile-tabs()
